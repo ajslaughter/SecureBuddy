@@ -70,7 +70,7 @@ function Get-DestinationPath {
             if (-not $env:USERPROFILE) {
                 throw "\$env:USERPROFILE is not defined."
             }
-            $moduleRoot = Join-Path -Path $env:USERPROFILE -ChildPath 'Documents\PowerShell\Modules'
+            $moduleRoot = Join-Path -Path $env:USERPROFILE -ChildPath 'Documents\WindowsPowerShell\Modules'
         }
     }
 
@@ -164,63 +164,7 @@ function Confirm-ChecksumsMatch {
     Write-Verbose "Checksum verification succeeded."
 }
 
-function Ensure-NuGetProvider {
-    [CmdletBinding()]
-    param()
-
-    $nuget = Get-PackageProvider -ListAvailable -Name NuGet -ErrorAction SilentlyContinue
-    if (-not $nuget) {
-        Write-Verbose "Installing NuGet package provider."
-        Install-PackageProvider -Name NuGet -Force -Scope CurrentUser -Confirm:$false | Out-Null
-    }
-}
-
-function Ensure-BurntToastModule {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory)]
-        [ValidateSet('CurrentUser', 'AllUsers')]
-        [string]$Scope
-    )
-
-    if (Get-Module -ListAvailable -Name BurntToast) {
-        Write-Verbose "BurntToast module is already available."
-        return
-    }
-
-    Write-Verbose "Installing BurntToast module (scope: $Scope)."
-    Ensure-NuGetProvider
-
-    $installParams = @{
-        Name = 'BurntToast'
-        Force = $true
-        Confirm = $false
-        ErrorAction = 'Stop'
-    }
-
-    $isAdmin = Test-IsAdministrator
-    if ($Scope -eq 'AllUsers' -and $isAdmin) {
-        $installParams['Scope'] = 'AllUsers'
-    }
-    else {
-        $installParams['Scope'] = 'CurrentUser'
-    }
-
-    try {
-        Install-Module @installParams | Out-Null
-    }
-    catch {
-        Write-Warning "Failed to install BurntToast module automatically: $_"
-        throw
-    }
-}
-
-if ($PSVersionTable.PSVersion.Major -lt 7) {
-    Write-Warning 'PowerShell 7 or later is recommended to run WinSysAuto. Some features may not be available on older versions.'
-}
-else {
-    Write-Verbose "Running on PowerShell $($PSVersionTable.PSVersion)."
-}
+Write-Verbose "Running on PowerShell $($PSVersionTable.PSVersion)."
 
 $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $moduleInfo = Resolve-ModuleRoot -BasePath $scriptRoot
@@ -246,7 +190,5 @@ $destinationPath = Get-DestinationPath -Scope $effectiveScope -ModuleName $modul
 if ($PSCmdlet.ShouldProcess($destinationPath, "Install module '$($moduleInfo.Name)'")) {
     Copy-ModuleContent -Source $moduleInfo.Path -Destination $destinationPath -Force:$Force
     Confirm-ChecksumsMatch -Source $moduleInfo.Path -Destination $destinationPath
-    Ensure-BurntToastModule -Scope $effectiveScope
     Write-Host "WinSysAuto module installed to '$destinationPath'." -ForegroundColor Green
-    Write-Host "BurntToast dependency ensured." -ForegroundColor Green
 }
