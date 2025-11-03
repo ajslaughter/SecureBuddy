@@ -1,254 +1,152 @@
 # WinSysAuto
-PowerShell module for Windows Server: inventory, patching, hardening, monitoring — one command, no agents.
 
-## Security baselines
-
-`functions/Set-SecurityBaseline.ps1` adds an idempotent entry point that reads a JSON or YAML baseline profile from the `baselines/` directory (or an explicit path) and enforces the desired firewall, Remote Desktop, password policy, and Microsoft Defender settings. The function honours `-WhatIf`/`-Confirm` semantics and returns a compliance summary so you can track which areas were already in the desired state.
-
-### Usage
-
-```powershell
-Import-Module "$PSScriptRoot/functions/Set-SecurityBaseline.ps1"
-
-# Apply the included sample baseline
-Set-SecurityBaseline -Baseline 'SampleBaseline.json' -Verbose
-
-# Apply a custom baseline file stored elsewhere
-Set-SecurityBaseline -Baseline 'C:\Security\production-baseline.yaml' -WhatIf
-```
-
-### Baseline schema
-
-Each baseline file is expected to follow this schema:
-
-- `Name` / `Version` *(optional)*: metadata for your own tracking.
-- `Firewall`: object with optional `Domain`, `Private`, and `Public` profiles. Each profile accepts any parameter supported by `Set-NetFirewallProfile` (for example `Enabled`, `DefaultInboundAction`, `DefaultOutboundAction`).
-- `RemoteDesktop`: object controlling Terminal Services registry keys.
-  - `Enable` *(boolean)*: enable (`true`) or disable (`false`) Remote Desktop connections.
-  - `AllowOnlySecureConnections` *(boolean)*: enforce Network Level Authentication when `true`.
-- `PasswordPolicy`: object mapped to `secedit.exe` `System Access` settings.
-  - `MinimumPasswordLength`, `MaximumPasswordAgeDays`, `MinimumPasswordAgeDays`, `PasswordHistorySize` *(integers)*.
-  - `ComplexityEnabled` *(boolean)*: toggles password complexity enforcement.
-  - `LockoutThreshold`, `LockoutDurationMinutes`, `ResetLockoutCounterMinutes` *(integers)*.
-- `Defender`: object mapped to `Set-MpPreference` parameters.
-  - `RealTimeMonitoring` *(boolean)*: when `true`, keeps real-time protection enabled.
-  - `CloudProtection` *(string)*: one of `Disabled`, `Basic`, or `Advanced` (`Enabled` is treated as `Advanced`).
-  - `SampleSubmission` *(string)*: one of `Never`, `Prompt`, `SafeSamples`, `Always`, `Automatic`.
-  - `SignatureUpdateIntervalHours` *(integer)*: applies to `SignatureScheduleInterval`.
-
-See [`baselines/SampleBaseline.json`](baselines/SampleBaseline.json) for a full example profile.
-# WinSysAuto v0.1
-
-WinSysAuto is a PowerShell automation module that orchestrates common Windows Server operations—inventory, patching, hardening, and monitoring—through composable functions. Version **v0.1** focuses on day-zero visibility and remediation so that administrators can standardize baseline management from a single toolchain.
-
-## Table of Contents
-- [Features](#features)
-- [Requirements](#requirements)
-- [Installation](#installation)
-  - [Install with `install.ps1`](#install-with-installps1)
-  - [Manual import](#manual-import)
-- [Usage Examples](#usage-examples)
-  - [Module discovery](#module-discovery)
-  - [Core functions](#core-functions)
-- [Roadmap](#roadmap)
-- [Contribution Guidelines](#contribution-guidelines)
-- [Testing Instructions](#testing-instructions)
-
-## Features
-WinSysAuto v0.1 includes the following capabilities:
-
-- **Unified inventory** – Collect hardware, OS, and role metadata with one command.
-- **Safe patch orchestration** – Stage, install, and verify updates with optional maintenance-window guards.
-- **Hardening baselines** – Apply opinionated security baselines and report drifts.
-- **Lightweight monitoring** – Poll critical Windows services and resource counters on demand.
-- **Idempotent design** – Each function re-evaluates state to avoid unintended reconfiguration.
-- **Composable pipelines** – Functions emit rich objects so you can pipe results into logging, reporting, or ticketing systems.
+WinSysAuto is a PowerShell 5.1 module that standardises common Windows Server
+automation tasks—inventory collection, patch visibility, security hardening and
+health monitoring—from a single toolchain. The module is designed for Windows
+Server 2022 Core systems running in Constrained Language Mode and ships without
+external dependencies.
 
 ## Requirements
-Before using WinSysAuto v0.1 ensure the following prerequisites are met:
 
-- PowerShell 5.1 or PowerShell 7.2+.
-- Windows Server 2016, 2019, or 2022 with latest security updates.
-- Local administrator rights (remote administrative permissions if managing other hosts).
-- Remote management enabled via WinRM for cross-machine operations.
-- Optional: Access to your update management solution (WSUS, Microsoft Update, or SCCM) for patch orchestration commands.
+- Windows Server 2016, 2019 or 2022 (tested on Windows Server 2022 Core)
+- PowerShell 5.1 running in Constrained Language Mode
+- Local administrator privileges for remediation tasks
+- Windows Defender feature installed (for Defender preference adjustments)
 
 ## Installation
-### Install with `install.ps1`
-The repository provides an `install.ps1` bootstrapper that copies the module into your PowerShell module path and registers default configuration files.
+
+Use the provided installer to place the module in a module path that works
+without Internet access:
 
 ```powershell
-# From a PowerShell prompt in the repository root
-git clone https://github.com/your-org/WinSysAuto.git
-cd WinSysAuto
+# From the repository root
 .\install.ps1 -Scope CurrentUser -Verbose
 ```
 
-Parameters:
+The installer copies the WinSysAuto folder into
+`$env:USERPROFILE\Documents\WindowsPowerShell\Modules\WinSysAuto`. To install for
+all users run `.\install.ps1 -Scope AllUsers` from an elevated session.
 
-- `-Scope` (`CurrentUser` | `AllUsers`): Controls whether the module installs to `~/Documents/WindowsPowerShell/Modules` or `C:\Program Files\WindowsPowerShell\Modules`.
-- `-Force`: Overwrites any existing WinSysAuto installation.
-- `-Verbose`: Enables detailed progress logging.
-
-### Manual import
-If you prefer manual installation:
+To manually import during development:
 
 ```powershell
-# Copy the module folder into a PSModulePath location
-Copy-Item -Path .\WinSysAuto -Destination "$env:USERPROFILE\Documents\WindowsPowerShell\Modules" -Recurse
-
-# Import the module in your session
-Import-Module WinSysAuto -Force
-
-# Confirm the module is available
-Get-Module WinSysAuto -ListAvailable
+Import-Module (Join-Path -Path $PSScriptRoot -ChildPath 'WinSysAuto.psd1') -Force
 ```
 
-To load the module in every session, add `Import-Module WinSysAuto` to your PowerShell profile script.
+## Baseline management
 
-## Usage Examples
-### Module discovery
-List module commands and review in-session help:
+Security baselines live in the `baselines/` directory as JSON files. Use
+`Get-SecurityBaseline` to inspect available definitions and `Set-SecurityBaseline`
+to apply them.
 
 ```powershell
-Get-Command -Module WinSysAuto
-Get-Help Get-WSAInventory -Detailed
+# List available baselines
+Get-SecurityBaseline -ListAvailable
+
+# Review the contents of the sample baseline
+Get-SecurityBaseline -BaselineName 'SampleBaseline'
+
+# Apply the sample baseline
+Set-SecurityBaseline -Baseline 'SampleBaseline' -Verbose
 ```
 
-### Core functions
-Each exported function includes verbose logging, supports `-WhatIf`, and returns structured objects. The snippets below illustrate common usage patterns and expected output.
+`Set-SecurityBaseline` honours `-WhatIf`/`-Confirm` semantics and returns a rich
+object that summarises how each settings area was handled. The function reads the
+baseline JSON file, applies firewall, Remote Desktop, password policy and
+Microsoft Defender settings, then records the applied baseline in
+`baselines/CurrentBaseline.(txt|json)`.
 
-#### `Get-WSAInventory`
-Collects host-level hardware and OS metadata.
+### Baseline schema
+
+The bundled `SampleBaseline.json` uses the following structure:
+
+- `Name` / `Version` *(optional)* – Metadata used for reporting.
+- `Firewall` – Optional `Domain`, `Private` and `Public` profile entries. Each
+  profile can specify `Enabled`, `DefaultInboundAction`, and
+  `DefaultOutboundAction` values accepted by `Set-NetFirewallProfile`.
+- `RemoteDesktop` – Controls Terminal Services registry keys.
+  - `Enable` *(bool)* – Enables or disables Remote Desktop.
+  - `AllowOnlySecureConnections` *(bool)* – Enforces Network Level Authentication
+    when set to `true`.
+- `PasswordPolicy` – Maps to `secedit.exe` "System Access" entries.
+  - `MinimumPasswordLength`, `MaximumPasswordAgeDays`,
+    `MinimumPasswordAgeDays`, `PasswordHistorySize` *(int)*.
+  - `ComplexityEnabled` *(bool)* – Enables password complexity enforcement.
+  - `LockoutThreshold`, `LockoutDurationMinutes`,
+    `ResetLockoutCounterMinutes` *(int)*.
+- `Defender` – Maps to `Set-MpPreference` parameters.
+  - `RealTimeMonitoring` *(bool)* – Keeps real-time protection enabled when true.
+  - `CloudProtection` *(string)* – One of `Disabled`, `Basic`, or `Advanced`.
+  - `SampleSubmission` *(string)* – One of `SafeSamples`, `AllSamples`, or
+    `NeverSend`.
+  - `SignatureUpdateIntervalHours` *(int)* – Schedules definition update checks.
+
+## Exported functions
+
+The module exports the following public functions:
+
+### `Get-Inventory`
+Collects OS, hardware, memory, network and patch information from the local
+machine and returns a structured object ready for reporting.
 
 ```powershell
-Get-WSAInventory -ComputerName "FS-01"
+Get-Inventory | Format-List
 ```
 
-Expected output (abbreviated):
-
-```text
-ComputerName : FS-01
-OSVersion    : 10.0.17763
-Roles        : {File-Services, DFS-Replication}
-LastBoot     : 2024-02-12T03:31:45
-BiosSerial   : 4CD1234XYZ
-```
-
-#### `Invoke-WSAPatching`
-Stages and installs Windows Updates with optional maintenance-window validation.
+### `Invoke-PatchScan`
+Performs a scan for applicable Windows Updates using the Windows Update APIs.
+The function reports available updates and respects the Windows Update service
+state.
 
 ```powershell
-Invoke-WSAPatching -ComputerName "FS-01" -Schedule "Sundays 02:00" -WhatIf
+Invoke-PatchScan -Verbose
 ```
 
-Expected output (abbreviated):
-
-```text
-VERBOSE: Validated maintenance window "Sundays 02:00".
-VERBOSE: Discovered 5 applicable updates.
-VERBOSE: [WhatIf] Would download KB5034123 (Security Update).
-```
-
-#### `Invoke-WSAHardening`
-Applies baseline security configurations and reports drifts.
+### `Get-SecurityBaseline`
+Parses JSON baseline definitions from the `baselines/` folder and returns the
+requested baseline, along with metadata about available baselines and the
+currently recorded baseline.
 
 ```powershell
-Invoke-WSAHardening -Baseline "CIS-Level1" -Remediate
+Get-SecurityBaseline -BaselineName 'SampleBaseline'
 ```
 
-Expected output (abbreviated):
-
-```text
-Baseline      : CIS-Level1
-AppliedRules  : 37
-SkippedRules  : 3 (requires manual validation)
-Compliance    : 92%
-```
-
-#### `Get-WSAMonitoring`
-Retrieves lightweight health telemetry such as service state and resource utilization.
+### `Set-SecurityBaseline`
+Applies the requested baseline using the schema described earlier. Returns a
+summary object detailing the outcome for each category of settings.
 
 ```powershell
-Get-WSAMonitoring -ComputerName "FS-01" -Counters "Processor(_Total)\% Processor Time","Memory\Available MBytes"
+Set-SecurityBaseline -Baseline 'SampleBaseline' -WhatIf
 ```
 
-Expected output (abbreviated):
-
-```text
-Timestamp               Counter                                   Value
----------               -------                                   -----
-2024-03-14T15:22:03Z    Processor(_Total)\\% Processor Time        23.7
-2024-03-14T15:22:03Z    Memory\\Available MBytes                  6128
-```
-
-#### `Test-WSACompliance`
-Evaluates compliance of a server fleet against defined policy files.
+### `Watch-Health`
+Samples CPU, memory and disk usage, emitting detailed objects for each sample
+interval. Use `-MaxSamples` to collect a finite set of samples.
 
 ```powershell
-Test-WSACompliance -ComputerName (Get-Content .\servers.txt) -PolicyPath .\Policies\core.json
+Watch-Health -CpuThreshold 85 -SampleIntervalSeconds 10 -MaxSamples 3
 ```
 
-Expected output (abbreviated):
-
-```text
-ComputerName Status  DriftCount
------------- ------  ----------
-FS-01        Pass    0
-DB-02        Fail    4
-```
-
-#### `Invoke-WSARemediation`
-Triggers targeted remediation actions for failed compliance checks.
+### `Export-InventoryReport`
+Generates an HTML report of the inventory data collected by `Get-Inventory`.
+Specify `-OutputDirectory` to control where the HTML file is written.
 
 ```powershell
-Invoke-WSARemediation -InputObject (Test-WSACompliance -ComputerName "DB-02" -PolicyPath .\Policies\core.json)
+Get-Inventory | Export-InventoryReport -OutputDirectory C:\Reports
 ```
 
-Expected output (abbreviated):
+## Testing
 
-```text
-ComputerName : DB-02
-Action       : Reset-NTFSPermissions
-Result       : Success
-Notes        : Remediation completed; re-run compliance scan.
-```
-
-## Roadmap
-Planned enhancements for upcoming releases include:
-
-1. **Desired State Configuration (DSC) export** – Generate DSC configurations from inventory snapshots.
-2. **Role-specific baselines** – Extend hardening templates for SQL Server, IIS, and AD DS roles.
-3. **Azure Arc integration** – Surface WinSysAuto jobs in centralized hybrid dashboards.
-4. **Interactive dashboard** – Provide a cross-platform UI for monitoring and remediation pipelines.
-5. **Plugin SDK** – Allow partners to deliver custom inventory collectors and remediations.
-
-## Contribution Guidelines
-We welcome community contributions. To get started:
-
-1. Fork the repository and create a feature branch from `main`.
-2. Adhere to PowerShell naming conventions and include comment-based help for new cmdlets.
-3. Update documentation and examples when you change functionality.
-4. Submit a pull request describing the motivation, solution, and testing evidence.
-5. Respond to review feedback within 5 business days.
-
-For substantial contributions, open an issue first to discuss design goals and alignment with the roadmap.
-
-## Testing Instructions
-WinSysAuto uses [Pester](https://pester.dev/) for unit and integration testing.
+WinSysAuto ships with Pester tests. Run them from the repository root with:
 
 ```powershell
-# Install Pester if needed
-Install-Module Pester -Scope CurrentUser -Force
-
-# Run all module tests
-Invoke-Pester -Path .\Tests -Output Detailed
+pwsh -NoLogo -NoProfile -File .\WinSysAuto\WinSysAuto.Tests.ps1
 ```
 
-Before submitting a pull request:
+If `PSScriptAnalyzer` is available in your environment you can lint the module:
 
-- Ensure `Invoke-Pester` reports zero failures.
-- Validate that `install.ps1` completes without errors using `-WhatIf` and live execution.
-- Test new functions on a Windows Server sandbox or virtual machine.
+```powershell
+pwsh -NoLogo -NoProfile -Command "Invoke-ScriptAnalyzer -Path .\WinSysAuto -Recurse"
+```
 
-For additional QA steps, document environment details (OS version, PowerShell edition, remoting topology) in the PR description.
+Both commands run without requiring Internet access.

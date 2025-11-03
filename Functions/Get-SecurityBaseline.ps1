@@ -52,8 +52,7 @@ function Get-SecurityBaseline {
         return
     }
 
-    $availableBaselines = @()
-    foreach ($file in $baselineFiles) {
+    $availableBaselines = foreach ($file in $baselineFiles) {
         $content = $null
         try {
             $content = Get-Content -Path $file.FullName -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
@@ -69,7 +68,7 @@ function Get-SecurityBaseline {
             [System.IO.Path]::GetFileNameWithoutExtension($file.Name)
         }
 
-        $availableBaselines += [pscustomobject]@{
+        [pscustomobject]@{
             Name        = $displayName
             Version     = if ($content -and $content.PSObject.Properties['Version']) { [string]$content.Version } else { $null }
             FileName    = $file.Name
@@ -80,7 +79,7 @@ function Get-SecurityBaseline {
 
     $currentBaselineName = $null
     $currentMarkerFiles = @(
-        Join-Path -Path $baselineDirectory -ChildPath 'CurrentBaseline.txt',
+        Join-Path -Path $baselineDirectory -ChildPath 'CurrentBaseline.txt'
         Join-Path -Path $baselineDirectory -ChildPath 'CurrentBaseline.json'
     )
 
@@ -148,7 +147,7 @@ function Get-SecurityBaseline {
         )
     }
 
-    return [pscustomobject]@{
+    [pscustomobject]@{
         Name               = $selectedBaseline.Name
         Version            = $selectedBaseline.Version
         Path               = $selectedBaseline.Path

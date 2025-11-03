@@ -10,8 +10,13 @@ Describe 'Get-SecurityBaseline' {
 {
   "Name": "Sample Security Baseline",
   "Version": "1.0",
-  "Settings": {
-    "Example": true
+  "Firewall": {
+    "Domain": {
+      "Enabled": true
+    }
+  },
+  "RemoteDesktop": {
+    "Enable": false
   }
 }
 '@
@@ -55,6 +60,6 @@ Describe 'Get-SecurityBaseline' {
 
         $result.Name | Should -Be 'Sample Security Baseline'
         $result.IsCurrent | Should -BeTrue
-        $result.Settings.Settings.Example | Should -BeTrue
+        $result.Settings.Firewall.Domain.Enabled | Should -BeTrue
     }
 }
