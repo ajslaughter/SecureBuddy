@@ -1,17 +1,21 @@
-$script:ModuleRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$functionsPath = Join-Path -Path $script:ModuleRoot -ChildPath 'Functions'
+$moduleRoot = Split-Path -Parent $PSCommandPath
+$functionRoot = Join-Path -Path $moduleRoot -ChildPath 'Functions'
 
-if (Test-Path -Path $functionsPath) {
-    Get-ChildItem -Path $functionsPath -Filter '*.ps1' -File | Sort-Object -Property FullName | ForEach-Object {
-        . $_.FullName
-    }
+Get-ChildItem -Path $functionRoot -Filter '*.ps1' -Recurse | Sort-Object FullName | ForEach-Object {
+    . $_.FullName
 }
 
-Export-ModuleMember -Function @(
-    'Get-Inventory',
-    'Invoke-PatchScan',
-    'Get-SecurityBaseline',
-    'Set-SecurityBaseline',
-    'Watch-Health',
-    'Export-InventoryReport'
+$publicFunctions = @(
+    'Get-WsaHealth',
+    'Ensure-WsaDnsForwarders',
+    'Ensure-WsaDhcpScope',
+    'Ensure-WsaOuModel',
+    'New-WsaUsersFromCsv',
+    'Ensure-WsaDeptShares',
+    'Ensure-WsaDriveMappings',
+    'Invoke-WsaSecurityBaseline',
+    'Start-WsaDailyReport',
+    'Backup-WsaConfig'
 )
+
+Export-ModuleMember -Function $publicFunctions
