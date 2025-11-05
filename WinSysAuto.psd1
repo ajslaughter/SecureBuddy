@@ -18,7 +18,9 @@
         'Invoke-WsaSecurityBaseline',
         'Start-WsaDailyReport',
         'Backup-WsaConfig',
-        'Invoke-WsaM3HealthReport'
+        'Invoke-WsaM3HealthReport',
+        'Start-WsaDashboard',
+        'Get-WsaDashboardData'
     )
     CmdletsToExport   = @()
     VariablesToExport = @()
