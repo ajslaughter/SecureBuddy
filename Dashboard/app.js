@@ -236,24 +236,34 @@ async function callApi(endpoint, options = {}) {
  * Update dashboard with health data
  */
 async function updateDashboard() {
+    console.log('updateDashboard() called');
+
     if (dashboardState.isRefreshing) {
+        console.log('Already refreshing, skipping');
         return;
     }
 
     dashboardState.isRefreshing = true;
 
     try {
-        const data = await fetch('/api/health').then(r => r.json());
+        console.log('Fetching /api/health...');
+        const response = await fetch('/api/health');
+        console.log('Response received:', response.status, response.statusText);
+
+        const data = await response.json();
+        console.log('Data parsed:', data);
 
         dashboardState.healthData = data;
         dashboardState.lastUpdate = new Date();
 
         // Update UI
+        console.log('Updating UI components...');
         updateHealthOverview(data);
         updateResourceMetrics(data);
         updateServices(data);
         updateAlerts(data);
         updateLastUpdated();
+        console.log('Dashboard updated successfully');
 
     } catch (error) {
         console.error('Failed to update dashboard:', error);
@@ -291,12 +301,12 @@ function updateHealthOverview(data) {
     const warningCount = document.getElementById('warningCount');
 
     if (criticalCount) {
-        const count = (data.alerts || []).filter(a => a.level === 'CRITICAL').length;
+        const count = (data.alerts || []).filter(a => a.level && a.level.toLowerCase() === 'critical').length;
         criticalCount.textContent = count;
     }
 
     if (warningCount) {
-        const count = (data.alerts || []).filter(a => a.level === 'WARNING').length;
+        const count = (data.alerts || []).filter(a => a.level && a.level.toLowerCase() === 'warning').length;
         warningCount.textContent = count;
     }
 
@@ -509,14 +519,17 @@ function setAllButtonsDisabled(disabled) {
  * Run health check
  */
 async function runHealthCheck() {
+    console.log('runHealthCheck() called');
     const button = document.getElementById('btnHealthCheck');
     setButtonLoading(button, true);
     showProgressModal('Running Health Check...', 'Gathering system metrics...');
 
     try {
+        console.log('Calling /api/action/health...');
         const result = await callApi('/api/action/health', {
             body: JSON.stringify({})
         });
+        console.log('Health check result:', result);
 
         closeModal('progressModal');
 
@@ -528,6 +541,7 @@ async function runHealthCheck() {
             showToast('error', 'Health Check Failed', result.message || 'An error occurred');
         }
     } catch (error) {
+        console.error('Health check error:', error);
         closeModal('progressModal');
         showToast('error', 'Health Check Failed', error.message);
     } finally {
@@ -781,15 +795,19 @@ function loadSettings() {
 // ===================================================================
 
 function startAutoRefresh() {
+    console.log('startAutoRefresh() called with interval:', dashboardState.settings.refreshInterval);
+
     if (refreshIntervalId) {
         clearInterval(refreshIntervalId);
     }
 
     refreshIntervalId = setInterval(() => {
+        console.log('Auto-refresh triggered');
         updateDashboard();
     }, dashboardState.settings.refreshInterval);
 
     updateAutoRefreshStatus();
+    console.log('Auto-refresh started');
 }
 
 function stopAutoRefresh() {
@@ -888,30 +906,42 @@ function setupKeyboardShortcuts() {
 // ===================================================================
 
 function setupEventListeners() {
+    console.log('setupEventListeners() called');
+
     // Quick Action Buttons
     const btnHealthCheck = document.getElementById('btnHealthCheck');
+    console.log('btnHealthCheck found:', !!btnHealthCheck);
     if (btnHealthCheck) {
         btnHealthCheck.addEventListener('click', runHealthCheck);
+        console.log('Health check click handler attached');
     }
 
     const btnBackup = document.getElementById('btnBackup');
+    console.log('btnBackup found:', !!btnBackup);
     if (btnBackup) {
         btnBackup.addEventListener('click', () => openModal('backupModal'));
+        console.log('Backup click handler attached');
     }
 
     const btnAddUsers = document.getElementById('btnAddUsers');
+    console.log('btnAddUsers found:', !!btnAddUsers);
     if (btnAddUsers) {
         btnAddUsers.addEventListener('click', () => openModal('addUsersModal'));
+        console.log('Add Users click handler attached');
     }
 
     const btnSecurityAudit = document.getElementById('btnSecurityAudit');
+    console.log('btnSecurityAudit found:', !!btnSecurityAudit);
     if (btnSecurityAudit) {
         btnSecurityAudit.addEventListener('click', runSecurityAudit);
+        console.log('Security Audit click handler attached');
     }
 
     const btnGenerateReport = document.getElementById('btnGenerateReport');
+    console.log('btnGenerateReport found:', !!btnGenerateReport);
     if (btnGenerateReport) {
         btnGenerateReport.addEventListener('click', generateReport);
+        console.log('Generate Report click handler attached');
     }
 
     // Settings
@@ -1018,9 +1048,16 @@ function initDashboard() {
 }
 
 // Start dashboard when DOM is ready
+console.log('app.js loaded, document.readyState:', document.readyState);
+
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initDashboard);
+    console.log('Waiting for DOMContentLoaded...');
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('DOMContentLoaded fired, initializing...');
+        initDashboard();
+    });
 } else {
+    console.log('DOM already loaded, initializing immediately...');
     initDashboard();
 }
 

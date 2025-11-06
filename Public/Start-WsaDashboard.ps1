@@ -635,6 +635,27 @@ function Start-WsaDashboard {
                         $response.OutputStream.Write($bytes, 0, $bytes.Length)
                     }
                 }
+                elseif ($request.HttpMethod -eq 'GET' -and $request.Url.AbsolutePath -ieq '/app.js') {
+                    # Serve app.js
+                    try {
+                        $jsPath = Join-Path -Path $dashboardRoot -ChildPath 'app.js'
+                        if (Test-Path -Path $jsPath) {
+                            $js = Get-Content -Path $jsPath -Raw -Encoding UTF8
+                        } else {
+                            $js = 'console.error("app.js file not found on server");'
+                        }
+                        $bytes = [System.Text.Encoding]::UTF8.GetBytes($js)
+                        $response.ContentType = 'application/javascript; charset=utf-8'
+                        $response.Headers['Cache-Control'] = 'no-store, no-cache, must-revalidate'
+                        $response.OutputStream.Write($bytes, 0, $bytes.Length)
+                        $response.StatusCode = 200
+                    } catch {
+                        $msg = "console.error('Error loading app.js: " + $_.Exception.Message.Replace("'", "\'") + "');"
+                        $bytes = [System.Text.Encoding]::UTF8.GetBytes($msg)
+                        $response.StatusCode = 500
+                        $response.OutputStream.Write($bytes, 0, $bytes.Length)
+                    }
+                }
                 else {
                     # 404 Not Found
                     $response.StatusCode = 404
