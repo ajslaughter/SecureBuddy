@@ -3,23 +3,15 @@
  * Professional sysadmin-focused dashboard with comprehensive state management
  */
 
-// ===================================================================
-// State Management
-// ===================================================================
 (function () {
     'use strict';
 
-    // Security: Capture and clear auth token immediately
-    const authToken = window.WSA_AUTH_TOKEN;
+    // [SECURITY] Capture and clear auth token immediately
+    const WSA_API_TOKEN = window.WSA_AUTH_TOKEN;
     if (window.WSA_AUTH_TOKEN) {
         delete window.WSA_AUTH_TOKEN;
-        console.log('Auth token secured');
+        console.log('WinSysAuto: Auth token secured.');
     }
-
-    // ===================================================================
-    // State Management
-    // ===================================================================
-
 
     // ===================================================================
     // State Management
@@ -52,9 +44,6 @@
     // Utility Functions
     // ===================================================================
 
-    /**
-     * Format relative time (e.g., "2 min ago")
-     */
     function formatRelativeTime(timestamp) {
         const now = new Date();
         const date = new Date(timestamp);
@@ -70,43 +59,6 @@
         return `${diffDay}d ago`;
     }
 
-    /**
-     * Format time for display
-     */
-    function formatTime(timestamp) {
-        return new Date(timestamp).toLocaleString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    }
-
-    /**
-     * Debounce function
-     */
-    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
-
-    // ===================================================================
-    // Toast Notification System
-    // ===================================================================
-
-    /**
-     * Show toast notification
-     * @param {string} type - success, error, warning, info
-     * @param {string} title - Toast title
-     * @param {string} message - Toast message
-     */
     function showToast(type, title, message) {
         const container = document.getElementById('toastContainer');
         const toast = document.createElement('div');
@@ -120,23 +72,20 @@
         };
 
         toast.innerHTML = `
-        <svg class="toast-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-            ${iconSvg[type] || iconSvg.info}
-        </svg>
-        <div class="toast-content">
-            <div class="toast-title">${title}</div>
-            <div class="toast-message">${message}</div>
-        </div>
-        <button class="close-btn" onclick="this.parentElement.remove()" style="margin-left: auto;">
-            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/>
+            <svg class="toast-icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                ${iconSvg[type] || iconSvg.info}
             </svg>
-        </button>
-    `;
-
+            <div class="toast-content">
+                <div class="toast-title">${title}</div>
+                <div class="toast-message">${message}</div>
+            </div>
+            <button class="close-btn" onclick="this.parentElement.remove()" style="margin-left: auto;">
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/>
+                </svg>
+            </button>
+        `;
         container.appendChild(toast);
-
-        // Auto-remove after 5 seconds
         setTimeout(() => {
             toast.style.opacity = '0';
             setTimeout(() => toast.remove(), 300);
@@ -147,58 +96,38 @@
     // Modal Management
     // ===================================================================
 
-    /**
-     * Open modal
-     * @param {string} modalId - ID of the modal to open
-     */
     function openModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
             modal.classList.add('active');
             dashboardState.modals[modalId.replace('Modal', '')] = true;
-            // Prevent body scroll
             document.body.style.overflow = 'hidden';
         }
     }
 
-    /**
-     * Close modal
-     * @param {string} modalId - ID of the modal to close
-     */
     function closeModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
             modal.classList.remove('active');
             dashboardState.modals[modalId.replace('Modal', '')] = true;
-            // Restore body scroll
             document.body.style.overflow = '';
         }
     }
 
-    /**
-     * Close modal on overlay click
-     */
     function setupModalCloseOnOverlay() {
         document.querySelectorAll('.modal').forEach(modal => {
             const overlay = modal.querySelector('.modal-overlay');
             if (overlay) {
-                overlay.addEventListener('click', () => {
-                    closeModal(modal.id);
-                });
+                overlay.addEventListener('click', () => closeModal(modal.id));
             }
         });
     }
 
-    /**
-     * Setup all close buttons in modals
-     */
     function setupModalCloseButtons() {
         document.querySelectorAll('.modal .close-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const modal = e.target.closest('.modal');
-                if (modal) {
-                    closeModal(modal.id);
-                }
+                if (modal) closeModal(modal.id);
             });
         });
     }
@@ -207,22 +136,13 @@
     // API Integration
     // ===================================================================
 
-    /**
-     * Call API with proper error handling
-     * @param {string} endpoint - API endpoint
-     * @param {object} options - Fetch options
-     * @returns {Promise<object>} API response
-     */
     async function callApi(endpoint, options = {}) {
         try {
             const headers = {};
-
-            // Add auth token if available
-            if (authToken) {
-                headers['X-Auth-Token'] = authToken;
+            // Use local secure token variable
+            if (WSA_API_TOKEN) {
+                headers['X-Auth-Token'] = WSA_API_TOKEN;
             }
-
-            // Handle multipart vs JSON
             if (!options.body instanceof FormData) {
                 headers['Content-Type'] = 'application/json';
             }
@@ -234,11 +154,9 @@
             });
 
             const data = await response.json();
-
             if (!data.ok && data.ok !== undefined) {
                 throw new Error(data.message || 'Request failed');
             }
-
             return data;
         } catch (error) {
             console.error('API Error:', error);
@@ -250,227 +168,145 @@
     // Dashboard Data Updates
     // ===================================================================
 
-    /**
-     * Update dashboard with health data
-     */
     async function updateDashboard() {
-        console.log('updateDashboard() called');
-
-        if (dashboardState.isRefreshing) {
-            console.log('Already refreshing, skipping');
-            return;
-        }
-
+        if (dashboardState.isRefreshing) return;
         dashboardState.isRefreshing = true;
 
         try {
-            console.log('Fetching /api/health...');
             const response = await fetch('/api/health');
-            console.log('Response received:', response.status, response.statusText);
-
             const data = await response.json();
-            console.log('Data parsed:', data);
-
             dashboardState.healthData = data;
             dashboardState.lastUpdate = new Date();
 
-            // Update UI
-            console.log('Updating UI components...');
             updateHealthOverview(data);
             updateResourceMetrics(data);
             updateServices(data);
             updateAlerts(data);
             updateLastUpdated();
-            console.log('Dashboard updated successfully');
-
         } catch (error) {
             console.error('Failed to update dashboard:', error);
-            showToast('error', 'Update Failed', 'Could not fetch latest data from server');
+            showToast('error', 'Update Failed', 'Could not fetch latest data');
         } finally {
             dashboardState.isRefreshing = false;
         }
     }
 
-    /**
-     * Update health overview cards
-     */
     function updateHealthOverview(data) {
-        // Health Score
         const healthScore = document.getElementById('healthScore');
         const overallHealthCard = document.getElementById('overallHealthCard');
-        const healthTrend = document.getElementById('healthTrend');
+        if (healthScore) healthScore.textContent = data.healthScore || '--';
 
-        if (healthScore) {
-            healthScore.textContent = data.healthScore || '--';
-        }
-
-        // Update card styling based on health status
         if (overallHealthCard) {
             overallHealthCard.classList.remove('critical-card', 'warning-card');
-            if (data.healthStatus === 'critical') {
-                overallHealthCard.classList.add('critical-card');
-            } else if (data.healthStatus === 'warning') {
-                overallHealthCard.classList.add('warning-card');
-            }
+            if (data.healthStatus === 'critical') overallHealthCard.classList.add('critical-card');
+            else if (data.healthStatus === 'warning') overallHealthCard.classList.add('warning-card');
         }
 
-        // Critical and Warning counts
         const criticalCount = document.getElementById('criticalCount');
-        const warningCount = document.getElementById('warningCount');
-
         if (criticalCount) {
-            const count = (data.alerts || []).filter(a => a.level && a.level.toLowerCase() === 'critical').length;
-            criticalCount.textContent = count;
+            criticalCount.textContent = (data.alerts || []).filter(a => a.level && a.level.toLowerCase() === 'critical').length;
         }
 
+        const warningCount = document.getElementById('warningCount');
         if (warningCount) {
-            const count = (data.alerts || []).filter(a => a.level && a.level.toLowerCase() === 'warning').length;
-            warningCount.textContent = count;
+            warningCount.textContent = (data.alerts || []).filter(a => a.level && a.level.toLowerCase() === 'warning').length;
         }
 
-        // Last Backup (placeholder - would need actual backup data from API)
         const lastBackup = document.getElementById('lastBackup');
         if (lastBackup && data.timestamp) {
             lastBackup.textContent = formatRelativeTime(data.timestamp);
         }
     }
 
-    /**
-     * Update resource metrics (CPU, Memory, Disk)
-     */
     function updateResourceMetrics(data) {
-        // CPU
         updateResourceCard('cpu', data.cpu?.total || 0);
-
-        // Memory
         if (data.memory) {
             updateResourceCard('memory', data.memory.percent);
             const memoryDetail = document.getElementById('memoryDetail');
-            if (memoryDetail) {
-                memoryDetail.textContent = `${data.memory.usedGB.toFixed(1)} GB / ${data.memory.totalGB.toFixed(1)} GB`;
-            }
+            if (memoryDetail) memoryDetail.textContent = `${data.memory.usedGB.toFixed(1)} GB / ${data.memory.totalGB.toFixed(1)} GB`;
         }
-
-        // Disk (primary drive)
         if (data.disk && data.disk.length > 0) {
             const primaryDisk = data.disk[0];
             updateResourceCard('disk', primaryDisk.usagePercent);
             const diskDetail = document.getElementById('diskDetail');
-            if (diskDetail) {
-                diskDetail.textContent = `${primaryDisk.usedGB.toFixed(1)} GB / ${primaryDisk.totalGB.toFixed(1)} GB`;
-            }
+            if (diskDetail) diskDetail.textContent = `${primaryDisk.usedGB.toFixed(1)} GB / ${primaryDisk.totalGB.toFixed(1)} GB`;
         }
     }
 
-    /**
-     * Update individual resource card
-     */
     function updateResourceCard(resource, percent) {
         const percentEl = document.getElementById(`${resource}Percent`);
         const barEl = document.getElementById(`${resource}Bar`);
         const thresholds = dashboardState.settings.thresholds[resource];
 
-        if (percentEl) {
-            percentEl.textContent = `${percent.toFixed(1)}%`;
-        }
-
+        if (percentEl) percentEl.textContent = `${percent.toFixed(1)}%`;
         if (barEl) {
             barEl.style.width = `${percent}%`;
             barEl.setAttribute('aria-valuenow', percent);
-
-            // Update color based on thresholds
             barEl.classList.remove('warning', 'critical');
-            if (percent >= thresholds.critical) {
-                barEl.classList.add('critical');
-            } else if (percent >= thresholds.warning) {
-                barEl.classList.add('warning');
-            }
+            if (percent >= thresholds.critical) barEl.classList.add('critical');
+            else if (percent >= thresholds.warning) barEl.classList.add('warning');
         }
     }
 
-    /**
-     * Update services list
-     */
     function updateServices(data) {
         const servicesList = document.getElementById('servicesList');
         if (!servicesList || !data.services) return;
-
         servicesList.innerHTML = '';
-
-        // Show only critical services (first 5)
         const criticalServices = data.services.slice(0, 5);
 
         criticalServices.forEach(service => {
             const serviceItem = document.createElement('div');
             serviceItem.className = `service-item ${service.health}`;
-
             const statusIconClass = service.status === 'Running' ? 'running' :
                 service.status === 'Stopped' ? 'stopped' : 'degraded';
-
             serviceItem.innerHTML = `
-            <span class="service-name">${service.name}</span>
-            <div class="service-status">
-                <span>${service.status}</span>
-                <div class="service-icon ${statusIconClass}"></div>
-            </div>
-        `;
-
+                <span class="service-name">${service.name}</span>
+                <div class="service-status">
+                    <span>${service.status}</span>
+                    <div class="service-icon ${statusIconClass}"></div>
+                </div>
+            `;
             servicesList.appendChild(serviceItem);
         });
 
-        // Update "View All Services" button
         const viewAllBtn = document.getElementById('viewAllServices');
-        if (viewAllBtn) {
-            viewAllBtn.textContent = `View All Services (${data.services.length})`;
-        }
+        if (viewAllBtn) viewAllBtn.textContent = `View All Services (${data.services.length})`;
     }
 
-    /**
-     * Update alerts list
-     */
     function updateAlerts(data) {
         const alertsList = document.getElementById('alertsList');
         if (!alertsList) return;
-
         alertsList.innerHTML = '';
 
         if (!data.alerts || data.alerts.length === 0) {
             alertsList.innerHTML = `
-            <div class="empty-state">
-                <svg width="48" height="48" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                </svg>
-                <p>No active alerts</p>
-            </div>
-        `;
+                <div class="empty-state">
+                    <svg width="48" height="48" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    <p>No active alerts</p>
+                </div>`;
             return;
         }
 
         data.alerts.forEach(alert => {
             const alertItem = document.createElement('div');
             alertItem.className = `alert-item ${alert.level.toLowerCase()}`;
-
             alertItem.innerHTML = `
-            <div class="alert-header">
-                <div class="alert-title">[${alert.level}] ${alert.metric}</div>
-                <div class="alert-time">just now</div>
-            </div>
-            <div class="alert-message">${alert.message}</div>
-            <div class="alert-actions">
-                <button class="link-btn" onclick="handleAlertAction('${alert.metric}')">View Details</button>
-                <button class="link-btn" onclick="dismissAlert('${alert.metric}')">Dismiss</button>
-            </div>
-        `;
-
+                <div class="alert-header">
+                    <div class="alert-title">[${alert.level}] ${alert.metric}</div>
+                    <div class="alert-time">just now</div>
+                </div>
+                <div class="alert-message">${alert.message}</div>
+                <div class="alert-actions">
+                    <button class="link-btn" onclick="handleAlertAction('${alert.metric}')">View Details</button>
+                    <button class="link-btn" onclick="dismissAlert('${alert.metric}')">Dismiss</button>
+                </div>`;
             alertsList.appendChild(alertItem);
         });
-
         dashboardState.alerts = data.alerts;
     }
 
-    /**
-     * Update last updated timestamp
-     */
     function updateLastUpdated() {
         const lastUpdated = document.getElementById('lastUpdated');
         if (lastUpdated && dashboardState.lastUpdate) {
@@ -478,7 +314,7 @@
         }
     }
 
-    // Alert actions (placeholders)
+    // Alert actions
     function handleAlertAction(metric) {
         showToast('info', 'Alert Action', `Viewing details for: ${metric}`);
     }
@@ -493,25 +329,15 @@
     // Button Loading State Helpers
     // ===================================================================
 
-    /**
-     * Set button loading state
-     */
     function setButtonLoading(button, isLoading) {
         if (!button) return;
-
         if (isLoading) {
             button.classList.add('btn-loading');
             button.disabled = true;
-
-            // Store original content
-            if (!button.dataset.originalHtml) {
-                button.dataset.originalHtml = button.innerHTML;
-            }
+            if (!button.dataset.originalHtml) button.dataset.originalHtml = button.innerHTML;
         } else {
             button.classList.remove('btn-loading');
             button.disabled = false;
-
-            // Restore original content
             if (button.dataset.originalHtml) {
                 button.innerHTML = button.dataset.originalHtml;
                 delete button.dataset.originalHtml;
@@ -519,88 +345,51 @@
         }
     }
 
-    /**
-     * Disable all action buttons
-     */
-    function setAllButtonsDisabled(disabled) {
-        const buttons = document.querySelectorAll('.action-btn, .btn-primary, .btn-secondary');
-        buttons.forEach(btn => {
-            btn.disabled = disabled;
-        });
-    }
-
     // ===================================================================
     // Action Button Handlers
     // ===================================================================
 
-    /**
-     * Run health check
-     */
     async function runHealthCheck() {
-        console.log('runHealthCheck() called');
         const button = document.getElementById('btnHealthCheck');
         setButtonLoading(button, true);
         showProgressModal('Running Health Check...', 'Gathering system metrics...');
-
         try {
-            console.log('Calling /api/action/health...');
-            const result = await callApi('/api/action/health', {
-                body: JSON.stringify({})
-            });
-            console.log('Health check result:', result);
-
+            const result = await callApi('/api/action/health', { body: JSON.stringify({}) });
             closeModal('progressModal');
-
             if (result.ok || result.ok === undefined) {
-                showToast('success', 'Health Check Complete', 'All system checks completed successfully');
-                // Refresh dashboard with new data
+                showToast('success', 'Health Check Complete', 'System checks completed');
                 await updateDashboard();
             } else {
-                showToast('error', 'Health Check Failed', result.message || 'An error occurred');
+                showToast('error', 'Check Failed', result.message);
             }
         } catch (error) {
-            console.error('Health check error:', error);
             closeModal('progressModal');
-            showToast('error', 'Health Check Failed', error.message);
+            showToast('error', 'Check Failed', error.message);
         } finally {
             setButtonLoading(button, false);
         }
     }
 
-    /**
-     * Show progress modal
-     */
     function showProgressModal(title, text) {
-        const modal = document.getElementById('progressModal');
         const titleEl = document.getElementById('progressTitle');
         const textEl = document.getElementById('progressText');
-
         if (titleEl) titleEl.textContent = title;
         if (textEl) textEl.textContent = text;
-
         openModal('progressModal');
     }
 
-    /**
-     * Create backup
-     */
     async function createBackup() {
         const button = document.getElementById('btnBackup');
         closeModal('backupModal');
         setButtonLoading(button, true);
         showProgressModal('Creating Backup...', 'Backing up configuration data...');
-
         try {
-            const result = await callApi('/api/action/backup', {
-                body: JSON.stringify({ note: 'Manual backup from dashboard' })
-            });
-
+            const result = await callApi('/api/action/backup', { body: JSON.stringify({ note: 'Manual backup' }) });
             closeModal('progressModal');
-
             if (result.ok || result.backupPath) {
-                showToast('success', 'Backup Complete', `Backup created: ${result.backupPath || 'Success'}`);
+                showToast('success', 'Backup Complete', `Created: ${result.backupPath || 'Success'}`);
             } else {
-                showToast('error', 'Backup Failed', result.message || 'An error occurred');
+                showToast('error', 'Backup Failed', result.message);
             }
         } catch (error) {
             closeModal('progressModal');
@@ -610,32 +399,15 @@
         }
     }
 
-    /**
-     * Add users from CSV
-     */
     async function addUsersFromCSV() {
         const fileInput = document.getElementById('csvFile');
         const defaultOU = document.getElementById('defaultOU').value;
         const autoCreateGroups = document.getElementById('autoCreateGroups').checked;
-        const sendWelcomeEmail = document.getElementById('sendWelcomeEmail').checked;
         const resetPasswords = document.getElementById('resetPasswords').checked;
 
-        if (!fileInput.files || fileInput.files.length === 0) {
-            showToast('error', 'No File Selected', 'Please select a CSV file');
-            return;
-        }
-
+        if (!fileInput.files || fileInput.files.length === 0) return showToast('error', 'No File', 'Select a CSV');
         const file = fileInput.files[0];
-
-        if (file.size > 2 * 1024 * 1024) {
-            showToast('error', 'File Too Large', 'File size exceeds 2 MB limit');
-            return;
-        }
-
-        if (!file.name.endsWith('.csv')) {
-            showToast('error', 'Invalid File Type', 'Please select a CSV file');
-            return;
-        }
+        if (!file.name.endsWith('.csv')) return showToast('error', 'Invalid File', 'Must be .csv');
 
         const button = document.getElementById('btnAddUsers');
         closeModal('addUsersModal');
@@ -649,73 +421,51 @@
             formData.append('groupsMode', autoCreateGroups ? 'Append' : 'Replace');
             formData.append('resetPasswords', resetPasswords.toString());
 
-            const result = await callApi('/api/action/new-users', {
-                body: formData
-            });
-
+            const result = await callApi('/api/action/new-users', { body: formData });
             closeModal('progressModal');
 
-            if (result.ok || result.created !== undefined) {
-                showToast('success', 'Users Created',
-                    `Created: ${result.created || 0}, Skipped: ${result.skipped || 0}`);
-                // Clear form
-                fileInput.value = '';
-                document.getElementById('defaultOU').value = '';
+            if (result.ok) {
+                showToast('success', 'Users Created', `Created: ${result.created}, Skipped: ${result.skipped}`);
             } else {
-                showToast('error', 'User Creation Failed', result.message || 'An error occurred');
+                showToast('error', 'Failed', result.message);
             }
         } catch (error) {
             closeModal('progressModal');
-            showToast('error', 'User Creation Failed', error.message);
+            showToast('error', 'Failed', error.message);
         } finally {
             setButtonLoading(button, false);
         }
     }
 
-    /**
-     * Run security audit
-     */
     async function runSecurityAudit() {
         const button = document.getElementById('btnSecurityAudit');
         setButtonLoading(button, true);
-        showProgressModal('Running Security Audit...', 'Checking security baseline...');
-
+        showProgressModal('Running Audit...', 'Checking baseline...');
         try {
-            const result = await callApi('/api/action/security-baseline', {
-                body: JSON.stringify({ mode: 'Audit' })
-            });
-
+            const result = await callApi('/api/action/security-baseline', { body: JSON.stringify({ mode: 'Audit' }) });
             closeModal('progressModal');
-
-            if (result.ok || result.summary) {
-                showToast('success', 'Security Audit Complete', result.summary || 'Audit completed successfully');
+            if (result.ok) {
+                showToast('success', 'Audit Complete', result.summary || 'Success');
             } else {
-                showToast('error', 'Security Audit Failed', result.message || 'An error occurred');
+                showToast('error', 'Audit Failed', result.message);
             }
         } catch (error) {
             closeModal('progressModal');
-            showToast('error', 'Security Audit Failed', error.message);
+            showToast('error', 'Audit Failed', error.message);
         } finally {
             setButtonLoading(button, false);
         }
     }
 
-    /**
-     * Generate report
-     */
     async function generateReport() {
         const button = document.getElementById('btnGenerateReport');
         setButtonLoading(button, true);
-
         try {
-            showToast('info', 'Generating Report', 'Preparing comprehensive system report...');
-
-            // Simulate report generation - in real implementation this would call the backend
+            showToast('info', 'Generating Report', 'Preparing system report...');
             await new Promise(resolve => setTimeout(resolve, 1500));
-
-            showToast('success', 'Report Ready', 'System report has been generated successfully');
+            showToast('success', 'Report Ready', 'Report generated successfully');
         } catch (error) {
-            showToast('error', 'Report Generation Failed', error.message);
+            showToast('error', 'Failed', error.message);
         } finally {
             setButtonLoading(button, false);
         }
@@ -725,9 +475,6 @@
     // Settings Management
     // ===================================================================
 
-    /**
-     * Toggle settings sidebar
-     */
     function toggleSettings() {
         const sidebar = document.getElementById('settingsSidebar');
         if (sidebar) {
@@ -735,9 +482,6 @@
         }
     }
 
-    /**
-     * Save settings
-     */
     function saveSettings() {
         // Get threshold values
         dashboardState.settings.thresholds.cpu.warning = parseInt(document.getElementById('cpuWarning').value);
@@ -776,9 +520,6 @@
         toggleSettings();
     }
 
-    /**
-     * Load settings from localStorage
-     */
     function loadSettings() {
         const saved = localStorage.getItem('wsa-dashboard-settings');
         if (saved) {
@@ -813,19 +554,9 @@
     // ===================================================================
 
     function startAutoRefresh() {
-        console.log('startAutoRefresh() called with interval:', dashboardState.settings.refreshInterval);
-
-        if (refreshIntervalId) {
-            clearInterval(refreshIntervalId);
-        }
-
-        refreshIntervalId = setInterval(() => {
-            console.log('Auto-refresh triggered');
-            updateDashboard();
-        }, dashboardState.settings.refreshInterval);
-
+        if (refreshIntervalId) clearInterval(refreshIntervalId);
+        refreshIntervalId = setInterval(updateDashboard, dashboardState.settings.refreshInterval);
         updateAutoRefreshStatus();
-        console.log('Auto-refresh started');
     }
 
     function stopAutoRefresh() {
@@ -910,7 +641,7 @@
                 }
             }
 
-            // Ctrl/Cmd + ?: Show help (placeholder)
+            // Ctrl/Cmd + ?: Show help
             if ((e.ctrlKey || e.metaKey) && e.key === '?') {
                 e.preventDefault();
                 showToast('info', 'Keyboard Shortcuts',
@@ -924,80 +655,31 @@
     // ===================================================================
 
     function setupEventListeners() {
-        console.log('setupEventListeners() called');
-
-        // Quick Action Buttons
         const btnHealthCheck = document.getElementById('btnHealthCheck');
-        console.log('btnHealthCheck found:', !!btnHealthCheck);
-        if (btnHealthCheck) {
-            btnHealthCheck.addEventListener('click', runHealthCheck);
-            console.log('Health check click handler attached');
-        }
+        if (btnHealthCheck) btnHealthCheck.addEventListener('click', runHealthCheck);
 
         const btnBackup = document.getElementById('btnBackup');
-        console.log('btnBackup found:', !!btnBackup);
-        if (btnBackup) {
-            btnBackup.addEventListener('click', () => openModal('backupModal'));
-            console.log('Backup click handler attached');
-        }
+        if (btnBackup) btnBackup.addEventListener('click', () => openModal('backupModal'));
 
         const btnAddUsers = document.getElementById('btnAddUsers');
-        console.log('btnAddUsers found:', !!btnAddUsers);
-        if (btnAddUsers) {
-            btnAddUsers.addEventListener('click', () => openModal('addUsersModal'));
-            console.log('Add Users click handler attached');
-        }
+        if (btnAddUsers) btnAddUsers.addEventListener('click', () => openModal('addUsersModal'));
 
         const btnSecurityAudit = document.getElementById('btnSecurityAudit');
-        console.log('btnSecurityAudit found:', !!btnSecurityAudit);
-        if (btnSecurityAudit) {
-            btnSecurityAudit.addEventListener('click', runSecurityAudit);
-            console.log('Security Audit click handler attached');
-        }
+        if (btnSecurityAudit) btnSecurityAudit.addEventListener('click', runSecurityAudit);
 
         const btnGenerateReport = document.getElementById('btnGenerateReport');
-        console.log('btnGenerateReport found:', !!btnGenerateReport);
-        if (btnGenerateReport) {
-            btnGenerateReport.addEventListener('click', generateReport);
-            console.log('Generate Report click handler attached');
-        }
+        if (btnGenerateReport) btnGenerateReport.addEventListener('click', generateReport);
 
         // Settings
-        const btnOpenSettings = document.getElementById('openSettings');
-        if (btnOpenSettings) {
-            btnOpenSettings.addEventListener('click', toggleSettings);
-        }
+        document.getElementById('openSettings')?.addEventListener('click', toggleSettings);
+        document.getElementById('closeSidebar')?.addEventListener('click', toggleSettings);
+        document.getElementById('saveSettings')?.addEventListener('click', saveSettings);
 
-        const btnCloseSidebar = document.getElementById('closeSidebar');
-        if (btnCloseSidebar) {
-            btnCloseSidebar.addEventListener('click', toggleSettings);
-        }
-
-        const btnSaveSettings = document.getElementById('saveSettings');
-        if (btnSaveSettings) {
-            btnSaveSettings.addEventListener('click', saveSettings);
-        }
-
-        // Modal Buttons
-        const btnCancelBackup = document.getElementById('cancelBackup');
-        if (btnCancelBackup) {
-            btnCancelBackup.addEventListener('click', () => closeModal('backupModal'));
-        }
-
-        const btnConfirmBackup = document.getElementById('confirmBackup');
-        if (btnConfirmBackup) {
-            btnConfirmBackup.addEventListener('click', createBackup);
-        }
-
-        const btnCancelAddUsers = document.getElementById('cancelAddUsers');
-        if (btnCancelAddUsers) {
-            btnCancelAddUsers.addEventListener('click', () => closeModal('addUsersModal'));
-        }
-
-        const btnConfirmAddUsers = document.getElementById('confirmAddUsers');
-        if (btnConfirmAddUsers) {
-            btnConfirmAddUsers.addEventListener('click', addUsersFromCSV);
-        }
+        // Modal Actions
+        document.getElementById('confirmBackup')?.addEventListener('click', createBackup);
+        document.getElementById('cancelBackup')?.addEventListener('click', () => closeModal('backupModal'));
+        document.getElementById('confirmAddUsers')?.addEventListener('click', addUsersFromCSV);
+        document.getElementById('cancelAddUsers')?.addEventListener('click', () => closeModal('addUsersModal'));
 
         // Resource detail buttons (placeholders)
         ['viewCpuDetails', 'viewMemoryDetails', 'viewAllDrives', 'viewAllServices'].forEach(id => {
@@ -1029,59 +711,25 @@
     // Initialization
     // ===================================================================
 
-    /**
-     * Initialize the dashboard
-     */
     function initDashboard() {
-        console.log('WinSysAuto Dashboard initializing...');
-
-        // Load settings
+        console.log('WinSysAuto Initializing...');
         loadSettings();
-
-        // Setup modal interactions
         setupModalCloseOnOverlay();
         setupModalCloseButtons();
-
-        // Setup collapsible sections
         setupCollapsibleSections();
-
-        // Setup event listeners
         setupEventListeners();
-
-        // Setup keyboard shortcuts
         setupKeyboardShortcuts();
-
-        // Initial dashboard load
         updateDashboard();
-
-        // Start auto-refresh if enabled
-        if (dashboardState.settings.autoRefresh) {
-            startAutoRefresh();
-        }
-
-        // Update "last updated" every 30 seconds
+        if (dashboardState.settings.autoRefresh) startAutoRefresh();
         setInterval(updateLastUpdated, 30000);
-
-        console.log('WinSysAuto Dashboard initialized successfully');
     }
 
-    // Start dashboard when DOM is ready
-    console.log('app.js loaded, document.readyState:', document.readyState);
-
     if (document.readyState === 'loading') {
-        console.log('Waiting for DOMContentLoaded...');
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('DOMContentLoaded fired, initializing...');
-            initDashboard();
-        });
+        document.addEventListener('DOMContentLoaded', initDashboard);
     } else {
-        console.log('DOM already loaded, initializing immediately...');
         initDashboard();
     }
 
-    // Cleanup on page unload
-    window.addEventListener('beforeunload', () => {
-        stopAutoRefresh();
-    });
+    window.addEventListener('beforeunload', stopAutoRefresh);
 
 })();
