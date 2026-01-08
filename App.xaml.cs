@@ -10,7 +10,7 @@ namespace SentinelField
         {
             if (!IsAdministrator())
             {
-                MessageBox.Show("TitanCheck requires Administrator privileges to run. Please restart as Administrator.", "Access Denied", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("SentinelField requires Administrator privileges to run. Please restart as Administrator.", "Access Denied", MessageBoxButton.OK, MessageBoxImage.Error);
                 Shutdown();
                 return;
             }
