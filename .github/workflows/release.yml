@@ -1,32 +1,25 @@
-name: Build and Release
-
+name: Build and Release SentinelField
 on:
   push:
     branches: [ "main" ]
-
 permissions:
   contents: write
-
 jobs:
-  release:
+  build:
     runs-on: windows-latest
-
     steps:
     - uses: actions/checkout@v4
-
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
-
-    - name: Publish
+    - name: Publish Standalone Binary
       run: dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:PublishTrimmed=true /p:PublishReadyToRun=true -o ./publish
-
-    - name: Upload Release
+    - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
         tag_name: v${{ github.run_number }}
-        name: SentinelField v${{ github.run_number }}
+        name: SentinelField Release v${{ github.run_number }}
         files: ./publish/SentinelField.exe
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

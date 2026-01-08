@@ -1,6 +1,6 @@
 # SentinelField Security Auditor
 
-**[📥 Download SentinelField.exe (One-Click)](https://github.com/ajslaughter/sentinel-secure/releases/latest/download/SentinelField.exe)**
+[📥 Download SentinelField for Windows (One-Click)](https://github.com/ajslaughter/sentinel-secure/releases/latest/download/SentinelField.exe)
 
 **SentinelField** is a native, high-performance Windows security auditing utility. No installation required. Carry it on a USB for field work.
 
