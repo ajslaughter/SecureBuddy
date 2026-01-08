@@ -61,3 +61,12 @@ dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=
 
 **Artifact Output**:
 `bin\Release\net8.0-windows\win-x64\publish\SentinelField.exe`
+
+## 📥 Download
+
+**[Download Latest Release](../../releases)**
+
+Get the compiled, single-file `SentinelField.exe` directly from GitHub Releases.
+- **Zero Installation**: Just download and run.
+- **Portable**: Carry on USB or deploy via network share.
+- **Admin Required**: Run as Administrator for full functionality.
