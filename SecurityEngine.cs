@@ -6,7 +6,7 @@ using Microsoft.Win32;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SentinelField
+namespace CyberShieldBuddy
 {
     public static class SecurityEngine
     {
@@ -483,6 +483,27 @@ namespace SentinelField
             {
                 AuditLogger.Log($"Error fixing display: {ex.Message}", "ERROR");
             }
+        }
+    }
+
+        // --- Phishing Buster ---
+        public static string AnalyzeUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url)) return "Please enter a URL.";
+
+            // Basic checks
+            if (!url.StartsWith("http", StringComparison.OrdinalIgnoreCase)) return "Suspicious: URL does not start with http/https.";
+            
+            // Check for IP address usage checks
+            if (System.Text.RegularExpressions.Regex.IsMatch(url, @"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")) return "Warning: Raw IP addresses are often used in phishing.";
+
+            // Suspicious characters
+            if (url.Contains("@")) return "Warning: URL contains '@' symbol, typical of credential harvesting.";
+            
+            // Length check
+            if (url.Length > 75) return "Caution: Unusually long URL.";
+
+            return "URL looks okay (Standard Format). Proceed with caution.";
         }
     }
 }

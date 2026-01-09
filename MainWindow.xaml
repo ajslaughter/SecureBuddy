@@ -1,195 +1,120 @@
-<Window x:Class="SentinelField.MainWindow"
+<Window x:Class="CyberShieldBuddy.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.modernwpf.com/2019"
-        xmlns:local="clr-namespace:SentinelField"
         mc:Ignorable="d"
-        Title="SentinelField Security Auditor" Height="700" Width="1000"
-        ui:WindowHelper.UseModernWindowStyle="True"
-        Background="{DynamicResource SystemControlPageBackgroundChromeLowBrush}">
+        Title="CyberShield Buddy" Height="800" Width="1000"
+        WindowStartupLocation="CenterScreen"
+        ui:WindowHelper.UseModernWindowStyle="True">
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="200"/>
         </Grid.RowDefinitions>
 
-        <ui:NavigationView x:Name="NavView" PaneDisplayMode="Top" IsSettingsVisible="False" SelectionChanged="NavView_SelectionChanged">
-            <ui:NavigationView.MenuItems>
-                <ui:NavigationViewItem Content="Dashboard Hub" Tag="Dashboard" Icon="Home"/>
-                <ui:NavigationViewItem Content="Hardening Shield" Tag="Hardening" Icon="Permissions"/>
-                <ui:NavigationViewItem Content="Network Sentry" Tag="Network" Icon="World"/>
-                <ui:NavigationViewItem Content="Resolution Emergency" Tag="Resolution" Icon="Video"/>
-            </ui:NavigationView.MenuItems>
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,20,0,20">
+            <TextBlock Text="CyberShield Buddy" Style="{StaticResource TitleTextBlockStyle}" 
+                       HorizontalAlignment="Center" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+            <TextBlock Text="Your Personal Cybersecurity Coach" 
+                       HorizontalAlignment="Center" Style="{StaticResource SubtitleTextBlockStyle}" Opacity="0.6"/>
+        </StackPanel>
 
-            <ui:Frame x:Name="ContentFrame"/>
-        </ui:NavigationView>
-
-        <!-- Dashboard Content Template -->
-        <Grid x:Name="DashboardGrid" Visibility="Collapsed">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="350"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- Audit Score -->
-            <Border Grid.Column="0" Margin="20" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" CornerRadius="8" Padding="20">
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <TextBlock Text="Hardening Score" Style="{StaticResource SmallHeaderStyle}" HorizontalAlignment="Center"/>
-                    <Grid Width="200" Height="200">
-                        <ui:ProgressRing IsActive="True" Value="{Binding HardeningScore}" Maximum="100" Width="180" Height="180" Foreground="{DynamicResource AccentBrush}"/>
-                        <TextBlock Text="{Binding HardeningScoreDisplay}" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="36" FontWeight="Bold"/>
-                    </Grid>
-                    <Button Content="Re-Scan System" HorizontalAlignment="Center" Margin="0,20,0,0" Click="RefreshDashboard_Click"/>
-                </StackPanel>
-            </Border>
-
-            <!-- System Quick-Info -->
-            <StackPanel Grid.Column="1" Margin="20">
-                <TextBlock Text="System Information" Style="{StaticResource HeaderTextBlockStyle}" Margin="0,0,0,10"/>
+        <ScrollViewer Grid.Row="1" Padding="20">
+            <StackPanel MaxWidth="800" HorizontalAlignment="Center">
                 
+                <!-- Health Monitor Section -->
+                <Border CornerRadius="12" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" Padding="30" Margin="0,0,0,20">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
+                    </Border.Effect>
+                    <StackPanel>
+                        <TextBlock Text="System Health" Style="{StaticResource HeaderTextBlockStyle}" HorizontalAlignment="Center"/>
+                        
+                        <!-- Visual Score Indicator -->
+                        <Grid Margin="0,20">
+                            <Ellipse Width="150" Height="150" StrokeThickness="8" Stroke="{DynamicResource SystemControlBackgroundBaseLowBrush}"/>
+                            <Ellipse x:Name="HealthStatusRing" Width="150" Height="150" StrokeThickness="8" Stroke="Gray"/>
+                            
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <TextBlock x:Name="ScoreText" Text="?" FontSize="48" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                <TextBlock x:Name="StatusText" Text="Unknown" HorizontalAlignment="Center" Opacity="0.7"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Button x:Name="ScanButton" Content="Scan Now" HorizontalAlignment="Center" Width="200" Height="50" 
+                                Click="ScanButton_Click" FontSize="18"/>
+                                
+                        <ItemsControl x:Name="IssuesList" Margin="0,20,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}" Foreground="#E74C3C" HorizontalAlignment="Center" Margin="0,2"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!-- Tools Grid -->
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="20"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
 
-                    <Border Grid.Row="0" Grid.Column="0" Margin="5" Padding="15" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" CornerRadius="4">
+                    <!-- Phishing Buster -->
+                    <Border Grid.Column="0" CornerRadius="12" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" Padding="20">
+                         <Border.Effect>
+                            <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
+                        </Border.Effect>
                         <StackPanel>
-                            <TextBlock Text="OS Build" Style="{StaticResource SmallHeaderStyle}"/>
-                            <TextBlock Text="{Binding SysInfo.OsBuild}" TextWrapping="Wrap" Style="{StaticResource ValueTextStyle}"/>
+                            <TextBlock Text="Phishing Buster" Style="{StaticResource SubheaderTextBlockStyle}" Margin="0,0,0,10"/>
+                            <TextBlock Text="Paste a suspicious link to check it." Opacity="0.6" TextWrapping="Wrap" Margin="0,0,0,10"/>
+                            <TextBox x:Name="UrlInput" PlaceholderText="https://example.com" Margin="0,0,0,10"/>
+                            <Button Content="Check Link" HorizontalAlignment="Stretch" Click="CheckLink_Click" Margin="0,0,0,10"/>
+                            <TextBlock x:Name="PhishingResult" TextWrapping="Wrap" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" FontWeight="SemiBold"/>
                         </StackPanel>
                     </Border>
 
-                    <Border Grid.Row="0" Grid.Column="1" Margin="5" Padding="15" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" CornerRadius="4">
+                    <!-- Fix My Screen -->
+                    <Border Grid.Column="2" CornerRadius="12" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" Padding="20">
+                         <Border.Effect>
+                            <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
+                        </Border.Effect>
                         <StackPanel>
-                            <TextBlock Text="BIOS Serial" Style="{StaticResource SmallHeaderStyle}"/>
-                            <TextBlock Text="{Binding SysInfo.BiosSerial}" Style="{StaticResource ValueTextStyle}"/>
-                        </StackPanel>
-                    </Border>
-
-                    <Border Grid.Row="1" Grid.Column="0" Margin="5" Padding="15" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" CornerRadius="4">
-                        <StackPanel>
-                            <TextBlock Text="TPM Status" Style="{StaticResource SmallHeaderStyle}"/>
-                            <TextBlock Text="{Binding SysInfo.TpmStatus}" Style="{StaticResource ValueTextStyle}"/>
-                        </StackPanel>
-                    </Border>
-
-                    <Border Grid.Row="1" Grid.Column="1" Margin="5" Padding="15" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" CornerRadius="4">
-                        <StackPanel>
-                            <TextBlock Text="BitLocker" Style="{StaticResource SmallHeaderStyle}"/>
-                            <TextBlock Text="{Binding SysInfo.BitLockerStatus}" Style="{StaticResource ValueTextStyle}"/>
+                            <TextBlock Text="Fix My Screen" Style="{StaticResource SubheaderTextBlockStyle}" Margin="0,0,0,10"/>
+                            <TextBlock Text="Screen glitching or multi-monitor issues?" Opacity="0.6" TextWrapping="Wrap" Margin="0,0,0,10"/>
+                            <Button Content="Fix Resolution" HorizontalAlignment="Stretch" Click="FixScreen_Click" Background="#E74C3C" Foreground="White" BorderThickness="0"/>
                         </StackPanel>
                     </Border>
                 </Grid>
+
+                <!-- Network Guardian -->
+                <Border CornerRadius="12" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" Padding="20" Margin="0,20,0,0">
+                     <Border.Effect>
+                        <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
+                    </Border.Effect>
+                    <StackPanel>
+                        <TextBlock Text="Network Guardian" Style="{StaticResource SubheaderTextBlockStyle}" Margin="0,0,0,10"/>
+                        <TextBlock Text="Active connections on your device." Opacity="0.6" Margin="0,0,0,10"/>
+                        <Button Content="Refresh Map" Click="RefreshNetwork_Click" HorizontalAlignment="Left" Margin="0,0,0,10"/>
+                        <ListView x:Name="NetworkList" Height="150" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn Header="App" DisplayMemberBinding="{Binding ProcessName}" Width="150"/>
+                                    <GridViewColumn Header="Remote Address" DisplayMemberBinding="{Binding RemoteAddress}" Width="150"/>
+                                    <GridViewColumn Header="State" DisplayMemberBinding="{Binding State}" Width="100"/>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+                    </StackPanel>
+                </Border>
+
             </StackPanel>
-        </Grid>
-
-        <!-- Hardening Shield Template -->
-        <Grid x:Name="HardeningGrid" Visibility="Collapsed" Margin="20">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            
-            <TextBlock Text="Security Hardening Checks" Style="{StaticResource HeaderTextBlockStyle}" Margin="0,0,0,20"/>
-
-            <ScrollViewer Grid.Row="1">
-                <StackPanel x:Name="ChecksPanel">
-                    <!-- Checks injected dynamically or bound -->
-                    <ItemsControl ItemsSource="{Binding SecurityChecks}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border Margin="0,0,0,10" Padding="15" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" CornerRadius="4">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel>
-                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14"/>
-                                            <TextBlock Text="{Binding Status}" Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" FontSize="12"/>
-                                        </StackPanel>
-                                        <TextBlock Grid.Column="1" Text="{Binding Result}" FontWeight="Bold" Foreground="{Binding ResultColor}" VerticalAlignment="Center" Margin="10,0,0,0"/>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-            </ScrollViewer>
-
-            <Button Grid.Row="2" Content="Apply Hardening Baseline" HorizontalAlignment="Right" Margin="0,20,0,0" Style="{StaticResource AccentButtonStyle}" Click="ApplyHardening_Click"/>
-        </Grid>
-
-        <!-- Network Sentry Template -->
-        <Grid x:Name="NetworkGrid" Visibility="Collapsed" Margin="20">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                <TextBlock Text="Active Network Connections" Style="{StaticResource SubtitleTextBlockStyle}" VerticalAlignment="Center"/>
-                <Button Content="Refresh" Margin="20,0,0,0" Click="RefreshNetwork_Click"/>
-                <CheckBox Content="Hide Loopback" Margin="20,0,0,0" IsChecked="True" Checked="RefreshNetwork_Click" Unchecked="RefreshNetwork_Click" x:Name="HideLoopbackCheck" VerticalAlignment="Center"/>
-            </StackPanel>
-
-            <DataGrid Grid.Row="1" x:Name="ConnectionsGrid" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Process" Binding="{Binding ProcessName}" Width="150"/>
-                    <DataGridTextColumn Header="PID" Binding="{Binding PID}" Width="60"/>
-                    <DataGridTextColumn Header="Local Address" Binding="{Binding LocalAddress}" Width="120"/>
-                    <DataGridTextColumn Header="Port" Binding="{Binding LocalPort}" Width="60"/>
-                    <DataGridTextColumn Header="Remote Address" Binding="{Binding RemoteAddress}" Width="120"/>
-                    <DataGridTextColumn Header="Remote Port" Binding="{Binding RemotePort}" Width="80"/>
-                    <DataGridTextColumn Header="State" Binding="{Binding State}" Width="*"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Grid>
-
-        <!-- Resolution Emergency Template -->
-        <Grid x:Name="ResolutionGrid" Visibility="Collapsed" Margin="20">
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock Text="Display Resolution Emergency Fix" Style="{StaticResource HeaderTextBlockStyle}" HorizontalAlignment="Center" Margin="0,0,0,20"/>
-                <TextBlock Text="This tool clears the Windows Graphics Driver configuration cache and triggers a connectivity scan. Use this if your multi-monitor setup is bugged or resolution is stuck." 
-                           TextWrapping="Wrap" MaxWidth="500" HorizontalAlignment="Center" TextAlignment="Center" Margin="0,0,0,30" Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
-                
-                <Button Content="Fix Display Configuration" FontSize="18" Padding="20,10" Style="{StaticResource AccentButtonStyle}" HorizontalAlignment="Center" Click="FixDisplay_Click"/>
-            </StackPanel>
-        </Grid>
-
-        <!-- Audit Logs (Always Visible at Bottom) -->
-        <Border Grid.Row="1" Background="#111111" BorderBrush="#333333" BorderThickness="0,1,0,0">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <TextBlock Text="AUDIT LOGS" Foreground="#666666" FontSize="10" FontWeight="Bold" Margin="10,5,0,0"/>
-                
-                <ScrollViewer Grid.Row="1" Margin="10">
-                    <ItemsControl ItemsSource="{Binding AuditLogs}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                    <TextBlock Text="{Binding Timestamp}" Foreground="#666666" FontFamily="Consolas" FontSize="11" Margin="0,0,10,0"/>
-                                    <TextBlock Text="{Binding Type}" Foreground="Yellow" FontFamily="Consolas" FontSize="11" Width="50"/>
-                                    <TextBlock Text="{Binding Message}" Foreground="#DDDDDD" FontFamily="Consolas" FontSize="11"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
-            </Grid>
-        </Border>
-
+        </ScrollViewer>
     </Grid>
 </Window>

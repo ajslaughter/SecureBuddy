@@ -14,7 +14,8 @@
     <PublishTrimmed>true</PublishTrimmed>
     <PublishReadyToRun>true</PublishReadyToRun>
     <DebugType>embedded</DebugType>
-    <ApplicationIcon>shield.ico</ApplicationIcon>
+    <RootNamespace>CyberShieldBuddy</RootNamespace>
+    <AssemblyName>CyberShieldBuddy</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
