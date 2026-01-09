@@ -22,7 +22,7 @@ jobs:
         
     - name: Publish
       # ModernWpfUI requires windows-latest and should restore automatically.
-      run: dotnet publish CyberShieldBuddy.csproj -c Release -r win-x64 /p:PublishSingleFile=true /p:SelfContained=true /p:PublishTrimmed=true /p:IncludeNativeLibrariesForSelfExtract=true -o release_output
+      run: dotnet publish **/*.csproj -c Release -r win-x64 /p:PublishSingleFile=true /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=true -o release_output
       
     - name: Upload Release Asset
       uses: softprops/action-gh-release@v1
