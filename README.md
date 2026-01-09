@@ -1,7 +1,7 @@
 # 🛡️ CyberShield Buddy
 > **Your Personal Cybersecurity Coach.**
 
-[**📥 Download CyberShield Buddy for Windows (One-Click)**](https://github.com/ajslaughter/WinSysAuto/releases/latest/download/CyberShieldBuddy.exe)
+[**📥 Download CyberShield Buddy for Windows (One-Click)**](https://github.com/ajslaughter/securebuddy/releases/latest/download/CyberShieldBuddy.exe)
 
 ---
 
