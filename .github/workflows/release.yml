@@ -26,13 +26,19 @@ jobs:
     - name: Build MSI
       run: dotnet build CyberShieldBuddy.Installer.wixproj -c Release
 
+    # This step ensures the file is named exactly what your README link expects
+    - name: Prepare Release Asset
+      shell: pwsh
+      run: |
+        $msiPath = Get-ChildItem -Path "**/bin/Release/**/*.msi" | Select-Object -First 1
+        Copy-Item $msiPath.FullName "CyberShieldBuddy.msi"
+
     - name: Upload Release Asset
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: v${{ github.run_number }}
-        name: CyberShield Buddy v${{ github.run_number }}
-        files: |
-           **/*.msi
+        tag_name: v1.0.${{ github.run_number }}
+        name: CyberShield Buddy v1.0.${{ github.run_number }}
+        files: CyberShieldBuddy.msi
         draft: false
         prerelease: false
       env:
