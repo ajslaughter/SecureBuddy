@@ -19,17 +19,20 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 8.0.x
-        
-    - name: Publish
-      # ModernWpfUI requires windows-latest and should restore automatically.
-      run: dotnet publish **/*.csproj -c Release -r win-x64 /p:PublishSingleFile=true /p:SelfContained=true /p:IncludeNativeLibrariesForSelfExtract=true -o release_output
-      
+
+    - name: Install WiX Toolset
+      run: dotnet tool install --global wix
+
+    - name: Build MSI
+      run: dotnet build CyberShieldBuddy.Installer.wixproj -c Release
+
     - name: Upload Release Asset
       uses: softprops/action-gh-release@v1
       with:
         tag_name: v${{ github.run_number }}
         name: CyberShield Buddy v${{ github.run_number }}
-        files: release_output/CyberShieldBuddy.exe
+        files: |
+           **/*.msi
         draft: false
         prerelease: false
       env:
