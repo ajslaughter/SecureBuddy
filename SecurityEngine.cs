@@ -484,7 +484,8 @@ namespace CyberShieldBuddy
                 AuditLogger.Log($"Error fixing display: {ex.Message}", "ERROR");
             }
         }
-    }
+
+
 
         // --- Phishing Buster ---
         public static string AnalyzeUrl(string url)
