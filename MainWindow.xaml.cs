@@ -13,7 +13,7 @@ namespace CyberShieldBuddy
             InitializeComponent();
             AuditLogger.Log("Application started", "INFO");
             // Initial scan/refresh
-            RefreshNetwork_Click(null, null);
+            RefreshNetwork_Click(this, new RoutedEventArgs());
         }
 
         private async void ScanButton_Click(object sender, RoutedEventArgs e)
@@ -91,7 +91,7 @@ namespace CyberShieldBuddy
                     "CyberShield Buddy", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 // Re-scan to update the score
-                ScanButton_Click(null, null);
+                ScanButton_Click(this, new RoutedEventArgs());
             }
             catch (Exception ex)
             {
@@ -125,15 +125,15 @@ namespace CyberShieldBuddy
                 PhishingResult.Foreground = Brushes.Red;
                 AuditLogger.Log($"URL flagged as suspicious: {url}", "WARN");
             }
-            else if (analysisResult.StartsWith("Caution"))
+            else if (analysisResult.StartsWith("ℹ️"))
             {
                 PhishingResult.Foreground = Brushes.Orange;
-                AuditLogger.Log($"URL flagged with caution: {url}", "WARN");
+                AuditLogger.Log($"URL flagged with note: {url}", "INFO");
             }
             else
             {
                 PhishingResult.Foreground = Brushes.Green;
-                AuditLogger.Log($"URL appears safe: {url}", "SUCCESS");
+                AuditLogger.Log($"No red flags found in URL: {url}", "INFO");
             }
         }
 

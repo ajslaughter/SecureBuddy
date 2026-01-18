@@ -40,17 +40,15 @@
       </Component>
     </DirectoryRef>
 
-    <DirectoryRef Id="DesktopFolder">
-      <Component Id="DesktopShortcut" Guid="d4e5f6a7-b8c9-5012-c345-678901abcdef">
-        <Shortcut Id="ApplicationDesktopShortcut"
-                  Name="CyberShield Buddy"
-                  Description="CyberShield Buddy Security Tool"
-                  Target="[INSTALLFOLDER]CyberShieldBuddy.exe"
-                  WorkingDirectory="INSTALLFOLDER"
-                  Icon="AppIcon" />
-        <RegistryValue Root="HKCU" Key="Software\SecureBuddy\CyberShieldBuddy" Name="desktopShortcut" Type="integer" Value="1" KeyPath="yes" />
-      </Component>
-    </DirectoryRef>
+    <Component Id="DesktopShortcut" Guid="d4e5f6a7-b8c9-5012-c345-678901abcdef" Directory="DesktopFolder">
+      <Shortcut Id="ApplicationDesktopShortcut"
+                Name="CyberShield Buddy"
+                Description="CyberShield Buddy Security Tool"
+                Target="[INSTALLFOLDER]CyberShieldBuddy.exe"
+                WorkingDirectory="INSTALLFOLDER"
+                Icon="AppIcon" />
+      <RegistryValue Root="HKCU" Key="Software\SecureBuddy\CyberShieldBuddy" Name="desktopShortcut" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
 
     <Icon Id="AppIcon" SourceFile="$(var.CyberShieldBuddy.TargetDir)CyberShieldBuddy.exe" />
   </Package>
