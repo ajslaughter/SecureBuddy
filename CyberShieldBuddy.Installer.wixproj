@@ -2,6 +2,7 @@
   <PropertyGroup>
     <OutputType>Package</OutputType>
     <IncludeSearchPaths>true</IncludeSearchPaths>
+    <InstallerPlatform>x64</InstallerPlatform>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="CyberShieldBuddy.csproj">
