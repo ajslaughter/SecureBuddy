@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Windows.Data;
 
 namespace CyberShieldBuddy
@@ -26,12 +27,29 @@ namespace CyberShieldBuddy
         {
             lock (_lock)
             {
-                Logs.Add(new AuditLogEntry
+                var entry = new AuditLogEntry
                 {
                     Timestamp = DateTime.Now.ToString("HH:mm:ss"),
                     Message = message,
                     Type = type
-                });
+                };
+                Logs.Add(entry);
+
+                // Persist to file for post-crash analysis
+                try
+                {
+                    string logPath = Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                        "CyberShieldBuddy",
+                        "audit.log"
+                    );
+                    Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
+                    File.AppendAllText(logPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} [{type}] {message}{Environment.NewLine}");
+                }
+                catch
+                {
+                    // Swallow file IO errors to prevent recursive crash
+                }
             }
         }
     }

@@ -16,11 +16,11 @@
     <DebugType>embedded</DebugType>
     <RootNamespace>CyberShieldBuddy</RootNamespace>
     <AssemblyName>CyberShieldBuddy</AssemblyName>
-    <ApplicationIcon>icon.png</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="ModernWpfUI" Version="0.9.6" />
+    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="8.0.0" />
     <PackageReference Include="System.Management" Version="8.0.0" />
     <PackageReference Include="System.Management.Automation" Version="7.4.0" />
   </ItemGroup>

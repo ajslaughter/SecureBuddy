@@ -1,5 +1,5 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
-  <Package Name="CyberShield Buddy" Manufacturer="SecureBuddy" Version="1.0.0.0" UpgradeCode="a1b2c3d4-e5f6-4789-8012-34567890abcdef">
+  <Package Name="CyberShield Buddy" Manufacturer="SecureBuddy" Version="1.0.0.0" UpgradeCode="7f3e2d1c-8a9b-4c5d-be6f-a0b1c2d3e4f5">
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
 
     <MediaTemplate EmbedCab="yes" />

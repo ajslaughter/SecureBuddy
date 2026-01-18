@@ -79,7 +79,7 @@
                         <StackPanel>
                             <TextBlock Text="Phishing Buster" Style="{StaticResource SubheaderTextBlockStyle}" Margin="0,0,0,10"/>
                             <TextBlock Text="Paste a suspicious link to check it." Opacity="0.6" TextWrapping="Wrap" Margin="0,0,0,10"/>
-                            <TextBox x:Name="UrlInput" PlaceholderText="https://example.com" Margin="0,0,0,10"/>
+                            <TextBox x:Name="UrlInput" ui:ControlHelper.PlaceholderText="https://example.com" Margin="0,0,0,10"/>
                             <Button Content="Check Link" HorizontalAlignment="Stretch" Click="CheckLink_Click" Margin="0,0,0,10"/>
                             <TextBlock x:Name="PhishingResult" TextWrapping="Wrap" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" FontWeight="SemiBold"/>
                         </StackPanel>
