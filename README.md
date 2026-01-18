@@ -2,7 +2,7 @@
 
 > **Your Personal Cybersecurity Coach for Windows**
 
-[![Download](https://img.shields.io/badge/Download-CyberShield%20Buddy-00AA00?style=for-the-badge&logo=windows)](https://github.com/ajslaughter/SecureBuddy/releases/latest/download/CyberShieldBuddy.msi)
+[![Download](https://img.shields.io/badge/Download-CyberShield%20Buddy-00AA00?style=for-the-badge&logo=windows)](https://github.com/ajslaughter/WinSysAuto/releases/latest/download/CyberShieldBuddy.msi)
 
 ---
 
@@ -47,7 +47,7 @@ Display glitching after connecting a new monitor? Hit this button to reset your 
 
 ## Installation
 
-1. **[Download the Installer](https://github.com/ajslaughter/SecureBuddy/releases/latest/download/CyberShieldBuddy.msi)** (one click)
+1. **[Download the Installer](https://github.com/ajslaughter/WinSysAuto/releases/latest/download/CyberShieldBuddy.msi)** (one click)
 2. **Run the MSI file** and follow the prompts
 3. **Launch from Start Menu** or Desktop shortcut
 4. **Click "Scan Now"** and follow the friendly advice!
