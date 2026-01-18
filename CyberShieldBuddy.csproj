@@ -16,6 +16,7 @@
     <DebugType>embedded</DebugType>
     <RootNamespace>CyberShieldBuddy</RootNamespace>
     <AssemblyName>CyberShieldBuddy</AssemblyName>
+    <ApplicationIcon>icon.png</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>

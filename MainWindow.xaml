@@ -45,8 +45,13 @@
                             </StackPanel>
                         </Grid>
 
-                        <Button x:Name="ScanButton" Content="Scan Now" HorizontalAlignment="Center" Width="200" Height="50" 
-                                Click="ScanButton_Click" FontSize="18"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+                            <Button x:Name="ScanButton" Content="Scan Now" Width="180" Height="50" 
+                                    Click="ScanButton_Click" FontSize="18" Margin="0,0,10,0"/>
+                            <Button x:Name="HardenButton" Content="Harden Now" Width="180" Height="50" 
+                                    Click="HardenButton_Click" FontSize="18" 
+                                    Background="#27AE60" Foreground="White" BorderThickness="0"/>
+                        </StackPanel>
                                 
                         <ItemsControl x:Name="IssuesList" Margin="0,20,0,0">
                             <ItemsControl.ItemTemplate>

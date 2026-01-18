@@ -1,7 +1,7 @@
 # 🛡️ CyberShield Buddy
 > **Your Personal Cybersecurity Coach.**
 
-[**📥 Download CyberShield Buddy Installer (One-Click)**](https://github.com/ajslaughter/securebuddy/releases/latest/download/CyberShieldBuddy.msi)
+[**📥 Download CyberShield Buddy Installer (One-Click)**](https://github.com/ajslaughter/SecureBuddy/releases/latest/download/CyberShieldBuddy.msi)
 
 ---
 
