@@ -13,28 +13,44 @@ jobs:
     runs-on: windows-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore CyberShieldBuddy.csproj
+
+    - name: Build Application
+      run: dotnet build CyberShieldBuddy.csproj -c Release --no-restore
 
     - name: Install WiX Toolset
       run: dotnet tool install --global wix
 
-    - name: Build MSI
-      run: dotnet build CyberShieldBuddy.Installer.wixproj -c Release
+    - name: Restore WiX project
+      run: dotnet restore CyberShieldBuddy.Installer.wixproj
 
-    # This step ensures the file is named exactly what your README link expects
+    - name: Build MSI
+      run: dotnet build CyberShieldBuddy.Installer.wixproj -c Release --no-restore
+
     - name: Prepare Release Asset
       shell: pwsh
       run: |
-        $msiPath = Get-ChildItem -Path "**/bin/Release/**/*.msi" | Select-Object -First 1
-        Copy-Item $msiPath.FullName "CyberShieldBuddy.msi"
+        $msiPath = Get-ChildItem -Path "bin/Release/*.msi" -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($msiPath) {
+          Copy-Item $msiPath.FullName "CyberShieldBuddy.msi"
+          Write-Host "Found MSI: $($msiPath.FullName)"
+        } else {
+          Write-Host "Looking for MSI in subdirectories..."
+          $msiPath = Get-ChildItem -Path "**/bin/Release/**/*.msi" -Recurse | Select-Object -First 1
+          Copy-Item $msiPath.FullName "CyberShieldBuddy.msi"
+          Write-Host "Found MSI: $($msiPath.FullName)"
+        }
 
     - name: Upload Release Asset
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         tag_name: v1.0.${{ github.run_number }}
         name: CyberShield Buddy v1.0.${{ github.run_number }}
