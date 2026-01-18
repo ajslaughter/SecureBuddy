@@ -23,38 +23,23 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore CyberShieldBuddy.csproj
 
-    - name: Build Application
-      run: dotnet build CyberShieldBuddy.csproj -c Release --no-restore
-
-    - name: Install WiX Toolset
-      run: dotnet tool install --global wix
-
-    - name: Restore WiX project
-      run: dotnet restore CyberShieldBuddy.Installer.wixproj
-
-    - name: Build MSI
-      run: dotnet build CyberShieldBuddy.Installer.wixproj -c Release --no-restore
+    - name: Publish Application (Single-File)
+      run: dotnet publish CyberShieldBuddy.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o ./publish
 
     - name: Prepare Release Asset
       shell: pwsh
       run: |
-        $msiPath = Get-ChildItem -Path "bin/Release/*.msi" -ErrorAction SilentlyContinue | Select-Object -First 1
-        if ($msiPath) {
-          Copy-Item $msiPath.FullName "CyberShieldBuddy.msi"
-          Write-Host "Found MSI: $($msiPath.FullName)"
-        } else {
-          Write-Host "Looking for MSI in subdirectories..."
-          $msiPath = Get-ChildItem -Path "**/bin/Release/**/*.msi" -Recurse | Select-Object -First 1
-          Copy-Item $msiPath.FullName "CyberShieldBuddy.msi"
-          Write-Host "Found MSI: $($msiPath.FullName)"
-        }
+        # Rename the published exe to the expected name
+        Copy-Item "./publish/CyberShieldBuddy.exe" "CyberShieldBuddy.exe"
+        Write-Host "Created single-file executable"
+        Get-ChildItem "CyberShieldBuddy.exe" | Select-Object Name, Length
 
     - name: Upload Release Asset
       uses: softprops/action-gh-release@v2
       with:
         tag_name: v1.0.${{ github.run_number }}
         name: CyberShield Buddy v1.0.${{ github.run_number }}
-        files: CyberShieldBuddy.msi
+        files: CyberShieldBuddy.exe
         draft: false
         prerelease: false
       env:

@@ -2,7 +2,7 @@
 
 > **Your Personal Cybersecurity Coach for Windows**
 
-[![Download](https://img.shields.io/badge/Download-CyberShield%20Buddy-00AA00?style=for-the-badge&logo=windows)](https://github.com/ajslaughter/WinSysAuto/releases/latest/download/CyberShieldBuddy.msi)
+[![Download](https://img.shields.io/badge/Download-CyberShield%20Buddy-00AA00?style=for-the-badge&logo=windows)](https://github.com/ajslaughter/WinSysAuto/releases/latest/download/CyberShieldBuddy.exe)
 
 ---
 
@@ -47,12 +47,12 @@ Display glitching after connecting a new monitor? Hit this button to reset your 
 
 ## Installation
 
-1. **[Download the Installer](https://github.com/ajslaughter/WinSysAuto/releases/latest/download/CyberShieldBuddy.msi)** (one click)
-2. **Run the MSI file** and follow the prompts
-3. **Launch from Start Menu** or Desktop shortcut
-4. **Click "Scan Now"** and follow the friendly advice!
+1. **[Download CyberShieldBuddy.exe](https://github.com/ajslaughter/WinSysAuto/releases/latest/download/CyberShieldBuddy.exe)** (one click)
+2. **Run the EXE** - Windows may show a SmartScreen warning, click "More info" → "Run anyway"
+3. **Click "Yes"** on the admin prompt
+4. **Start securing your PC!**
 
-> 💡 **Tip:** CyberShield Buddy needs Administrator access to check and fix security settings. Right-click → "Run as administrator" if prompted.
+> 💡 **Tip:** This is a portable app - no installation needed! Just run the EXE from anywhere.
 
 ---
 
