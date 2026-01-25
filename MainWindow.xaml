@@ -5,11 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         mc:Ignorable="d"
-        Title="CyberShield Buddy" Height="900" Width="1100"
+        Title="CyberShield Buddy - Command Center" Height="950" Width="1280"
         WindowStartupLocation="CenterScreen"
-        Background="{StaticResource SlateBackgroundBrush}"
+        Background="{StaticResource VoidBlackBrush}"
         ui:WindowHelper.UseModernWindowStyle="True"
-        ui:TitleBar.Background="{StaticResource SlateBackgroundBrush}"
+        ui:TitleBar.Background="{StaticResource VoidBlackBrush}"
         ui:TitleBar.Foreground="{StaticResource TextPrimaryBrush}">
 
     <Grid>
@@ -18,112 +18,336 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <Border Grid.Row="0" Background="{StaticResource SlateBackgroundBrush}" Padding="0,24,0,16">
-            <StackPanel HorizontalAlignment="Center">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
-                    <!-- Shield Icon using Segoe MDL2 Assets -->
-                    <TextBlock Text="&#xE83D;" FontFamily="Segoe MDL2 Assets" FontSize="36"
-                               Foreground="{StaticResource IndigoAccentBrush}" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                    <TextBlock Text="CyberShield Buddy" FontSize="32" FontWeight="Bold"
-                               Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- HEADER - Command Center Title                                    -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <Border Grid.Row="0" Padding="40,24,40,20">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                    <GradientStop Color="#030712" Offset="0"/>
+                    <GradientStop Color="#0a0f1a" Offset="0.5"/>
+                    <GradientStop Color="#030712" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- Animated Shield Icon -->
+                    <Border Width="56" Height="56" CornerRadius="14" Margin="0,0,16,0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#06b6d4" Offset="0"/>
+                                <GradientStop Color="#0891b2" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="25" ShadowDepth="0" Opacity="0.6" Color="#06b6d4"/>
+                        </Border.Effect>
+                        <TextBlock Text="&#xE83D;" FontFamily="Segoe MDL2 Assets" FontSize="28"
+                                   Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="CyberShield Buddy" FontSize="28" FontWeight="Bold"
+                                   Foreground="{StaticResource TextBrightBrush}"/>
+                        <TextBlock Text="COMMAND CENTER" FontSize="11" FontWeight="SemiBold"
+                                   Foreground="{StaticResource CyanPrimaryBrush}"
+                                   Opacity="0.9" LetterSpacing="3" Margin="0,2,0,0"/>
+                    </StackPanel>
                 </StackPanel>
-                <TextBlock Text="Your Personal Cybersecurity Coach" FontSize="16"
-                           Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
-            </StackPanel>
+
+                <!-- System Status Indicator -->
+                <Border Grid.Column="1" CornerRadius="20" Padding="16,8" VerticalAlignment="Center">
+                    <Border.Background>
+                        <SolidColorBrush Color="#0a1520"/>
+                    </Border.Background>
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse x:Name="SystemStatusDot" Width="10" Height="10" Fill="{StaticResource CyanPrimaryBrush}"
+                                 Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="SystemStatusText" Text="System Online" FontSize="13"
+                                   Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
         </Border>
 
-        <ScrollViewer Grid.Row="1" Padding="32,16,32,32" Background="{StaticResource SlateBackgroundBrush}">
-            <StackPanel MaxWidth="900" HorizontalAlignment="Center">
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- MAIN CONTENT                                                     -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <ScrollViewer Grid.Row="1" Padding="40,20,40,40" Background="{StaticResource VoidBlackBrush}">
+            <StackPanel MaxWidth="1200" HorizontalAlignment="Center">
 
-                <!-- Health Monitor Section -->
-                <Border Style="{StaticResource DarkCardStyle}" Margin="0,0,0,24">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                <!-- ═══════════════════════════════════════════════════════════════ -->
+                <!-- THREAT RADAR & STATS DASHBOARD                                   -->
+                <!-- ═══════════════════════════════════════════════════════════════ -->
+                <Grid Margin="0,0,0,32">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="32"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-                        <!-- Circular Progress Ring -->
-                        <Grid Grid.Column="0" Margin="0,0,40,0" Width="180" Height="180">
-                            <!-- Background Ring -->
-                            <Ellipse Width="180" Height="180" StrokeThickness="12"
-                                     Stroke="{StaticResource ProgressRingBackgroundBrush}" Fill="Transparent"/>
+                    <!-- Threat Radar (Left Side) -->
+                    <Border Grid.Column="0" Style="{StaticResource GlassCardStyle}" Width="380">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
-                            <!-- Progress Ring (Arc) -->
-                            <Canvas Width="180" Height="180">
-                                <Path x:Name="ProgressArc" StrokeThickness="12" StrokeStartLineCap="Round" StrokeEndLineCap="Round">
-                                    <Path.Stroke>
-                                        <SolidColorBrush x:Name="ProgressArcBrush" Color="{StaticResource TextMuted}"/>
-                                    </Path.Stroke>
-                                    <Path.Data>
-                                        <PathGeometry>
-                                            <PathFigure x:Name="ProgressFigure" StartPoint="90,6">
-                                                <ArcSegment x:Name="ProgressArcSegment"
-                                                            Size="84,84"
-                                                            SweepDirection="Clockwise"
-                                                            IsLargeArc="False"
-                                                            Point="90,6"/>
-                                            </PathFigure>
-                                        </PathGeometry>
-                                    </Path.Data>
-                                </Path>
-                            </Canvas>
-
-                            <!-- Score Display -->
-                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <TextBlock x:Name="ScoreText" Text="?" FontSize="56" FontWeight="Bold"
-                                           Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
-                                <TextBlock x:Name="StatusText" Text="Tap Scan" FontSize="14"
-                                           Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </Grid>
-
-                        <!-- Health Info and Actions -->
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                <TextBlock Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" FontSize="24"
-                                           Foreground="{StaticResource IndigoAccentBrush}" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                                <TextBlock Text="System Health" FontSize="24" FontWeight="SemiBold"
+                            <!-- Radar Title -->
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+                                <TextBlock Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" FontSize="20"
+                                           Foreground="{StaticResource CyanPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                <TextBlock Text="THREAT RADAR" FontSize="14" FontWeight="SemiBold" LetterSpacing="2"
                                            Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                             </StackPanel>
-                            <TextBlock Text="Analyze your system's security posture and apply hardening measures."
-                                       FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"
-                                       TextWrapping="Wrap" Margin="0,0,0,20" MaxWidth="400"/>
 
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                                <Button x:Name="ScanButton" Style="{StaticResource AccentButtonStyle}"
-                                        Width="160" Height="48" Click="ScanButton_Click" Margin="0,0,12,0">
+                            <!-- Circular Radar Display -->
+                            <Grid Grid.Row="1" Width="260" Height="260" HorizontalAlignment="Center">
+                                <!-- Outer glow ring -->
+                                <Ellipse Width="260" Height="260" StrokeThickness="2" Fill="Transparent">
+                                    <Ellipse.Stroke>
+                                        <SolidColorBrush x:Name="RadarOuterGlow" Color="#1506b6d4"/>
+                                    </Ellipse.Stroke>
+                                </Ellipse>
+
+                                <!-- Background Ring -->
+                                <Ellipse Width="220" Height="220" StrokeThickness="14"
+                                         Stroke="{StaticResource ProgressRingBackgroundBrush}" Fill="Transparent"/>
+
+                                <!-- Progress Ring (Arc) -->
+                                <Canvas Width="220" Height="220">
+                                    <Path x:Name="ProgressArc" StrokeThickness="14" StrokeStartLineCap="Round" StrokeEndLineCap="Round">
+                                        <Path.Stroke>
+                                            <SolidColorBrush x:Name="ProgressArcBrush" Color="#6b7280"/>
+                                        </Path.Stroke>
+                                        <Path.Effect>
+                                            <DropShadowEffect x:Name="ProgressGlow" BlurRadius="15" ShadowDepth="0" Opacity="0.6" Color="#6b7280"/>
+                                        </Path.Effect>
+                                        <Path.Data>
+                                            <PathGeometry>
+                                                <PathFigure x:Name="ProgressFigure" StartPoint="110,7">
+                                                    <ArcSegment x:Name="ProgressArcSegment"
+                                                                Size="103,103"
+                                                                SweepDirection="Clockwise"
+                                                                IsLargeArc="False"
+                                                                Point="110,7"/>
+                                                </PathFigure>
+                                            </PathGeometry>
+                                        </Path.Data>
+                                    </Path>
+
+                                    <!-- Radar sweep line (animated) -->
+                                    <Line x:Name="RadarSweepLine" X1="110" Y1="110" X2="110" Y2="20"
+                                          Stroke="{StaticResource CyanPrimaryBrush}" StrokeThickness="2" Opacity="0.5">
+                                        <Line.RenderTransform>
+                                            <RotateTransform x:Name="RadarSweepRotation" CenterX="110" CenterY="110" Angle="0"/>
+                                        </Line.RenderTransform>
+                                    </Line>
+                                </Canvas>
+
+                                <!-- Inner circle with score -->
+                                <Border Width="160" Height="160" CornerRadius="80" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Border.Background>
+                                        <RadialGradientBrush Center="0.5,0.3" RadiusX="0.7" RadiusY="0.7">
+                                            <GradientStop Color="#15ffffff" Offset="0"/>
+                                            <GradientStop Color="#05ffffff" Offset="1"/>
+                                        </RadialGradientBrush>
+                                    </Border.Background>
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <TextBlock x:Name="ScoreText" Text="--" FontSize="64" FontWeight="Bold"
+                                                   Foreground="{StaticResource TextBrightBrush}" HorizontalAlignment="Center"/>
+                                        <TextBlock x:Name="StatusText" Text="TAP SCAN" FontSize="12" FontWeight="SemiBold"
+                                                   Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center"
+                                                   LetterSpacing="2"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <!-- Action Buttons -->
+                            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,24,0,0">
+                                <Button x:Name="ScanButton" Style="{StaticResource CyberButtonStyle}"
+                                        Width="140" Height="44" Click="ScanButton_Click" Margin="0,0,12,0">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" FontSize="16"
                                                    VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                        <TextBlock Text="Scan Now" FontSize="16" VerticalAlignment="Center"/>
+                                        <TextBlock x:Name="ScanButtonText" Text="Scan Now" FontSize="14" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
                                 <Button x:Name="HardenButton" Style="{StaticResource SafeButtonStyle}"
-                                        Width="160" Height="48" Click="HardenButton_Click">
+                                        Width="140" Height="44" Click="HardenButton_Click">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="&#xE9D5;" FontFamily="Segoe MDL2 Assets" FontSize="16"
                                                    VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                        <TextBlock Text="Harden Now" FontSize="16" VerticalAlignment="Center"/>
+                                        <TextBlock x:Name="HardenButtonText" Text="Harden" FontSize="14" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
+                        </Grid>
+                    </Border>
 
-                        </StackPanel>
+                    <!-- Stats Dashboard (Right Side) -->
+                    <Grid Grid.Column="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="16"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Stat Card 1: Protected -->
+                        <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource StatCardStyle}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                    <Border Width="40" Height="40" CornerRadius="10" Margin="0,0,12,0">
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="#10b981" Offset="0"/>
+                                                <GradientStop Color="#059669" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                        <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                                   Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <TextBlock Text="Protected" FontSize="14" FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <TextBlock x:Name="ProtectedCount" Grid.Row="1" Text="--" FontSize="48" FontWeight="Bold"
+                                           Foreground="{StaticResource StatusSafeBrush}" VerticalAlignment="Center" Margin="0,8,0,0"/>
+
+                                <TextBlock Grid.Row="2" Text="security settings enabled" FontSize="11"
+                                           Foreground="{StaticResource TextMutedBrush}"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Stat Card 2: Warnings -->
+                        <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource StatCardStyle}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                    <Border Width="40" Height="40" CornerRadius="10" Margin="0,0,12,0">
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="#f59e0b" Offset="0"/>
+                                                <GradientStop Color="#d97706" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                        <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                                   Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <TextBlock Text="Warnings" FontSize="14" FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <TextBlock x:Name="WarningsCount" Grid.Row="1" Text="--" FontSize="48" FontWeight="Bold"
+                                           Foreground="{StaticResource StatusWarningBrush}" VerticalAlignment="Center" Margin="0,8,0,0"/>
+
+                                <TextBlock Grid.Row="2" Text="items need attention" FontSize="11"
+                                           Foreground="{StaticResource TextMutedBrush}"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Stat Card 3: Connections -->
+                        <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource StatCardStyle}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                    <Border Width="40" Height="40" CornerRadius="10" Margin="0,0,12,0">
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="#06b6d4" Offset="0"/>
+                                                <GradientStop Color="#0891b2" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                        <TextBlock Text="&#xE968;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                                   Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <TextBlock Text="Connections" FontSize="14" FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <TextBlock x:Name="ConnectionsCount" Grid.Row="1" Text="--" FontSize="48" FontWeight="Bold"
+                                           Foreground="{StaticResource CyanPrimaryBrush}" VerticalAlignment="Center" Margin="0,8,0,0"/>
+
+                                <TextBlock Grid.Row="2" Text="active network connections" FontSize="11"
+                                           Foreground="{StaticResource TextMutedBrush}"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Stat Card 4: Last Scan -->
+                        <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource StatCardStyle}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                    <Border Width="40" Height="40" CornerRadius="10" Margin="0,0,12,0">
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="#a855f7" Offset="0"/>
+                                                <GradientStop Color="#9333ea" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                        <TextBlock Text="&#xE823;" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                                   Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <TextBlock Text="Last Scan" FontSize="14" FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <TextBlock x:Name="LastScanTime" Grid.Row="1" Text="Never" FontSize="24" FontWeight="Bold"
+                                           Foreground="{StaticResource NeonPurpleBrush}" VerticalAlignment="Center" Margin="0,8,0,0"/>
+
+                                <TextBlock x:Name="LastScanDate" Grid.Row="2" Text="Run your first scan" FontSize="11"
+                                           Foreground="{StaticResource TextMutedBrush}"/>
+                            </Grid>
+                        </Border>
                     </Grid>
-                </Border>
+                </Grid>
 
-                <!-- Security Status Cards -->
-                <Border Style="{StaticResource DarkCardStyle}" Margin="0,0,0,24" x:Name="SecurityCardsSection" Visibility="Collapsed">
+                <!-- ═══════════════════════════════════════════════════════════════ -->
+                <!-- SECURITY STATUS CARDS                                            -->
+                <!-- ═══════════════════════════════════════════════════════════════ -->
+                <Border Style="{StaticResource GlassCardStyle}" Margin="0,0,0,24" x:Name="SecurityCardsSection" Visibility="Collapsed">
                     <StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                            <TextBlock Text="&#xE83D;" FontFamily="Segoe MDL2 Assets" FontSize="24"
-                                       Foreground="{StaticResource IndigoAccentBrush}" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                            <TextBlock Text="&#xE83D;" FontFamily="Segoe MDL2 Assets" FontSize="20"
+                                       Foreground="{StaticResource CyanPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,12,0"/>
                             <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="Security Settings" FontSize="20" FontWeight="SemiBold"
+                                <TextBlock Text="SECURITY SETTINGS" FontSize="14" FontWeight="SemiBold" LetterSpacing="2"
                                            Foreground="{StaticResource TextPrimaryBrush}"/>
-                                <TextBlock Text="Click each card to learn more" FontSize="12"
+                                <TextBlock Text="Click each card for details" FontSize="11"
                                            Foreground="{StaticResource TextMutedBrush}"/>
                             </StackPanel>
                         </StackPanel>
@@ -143,35 +367,35 @@
                                                 <Setter Property="Background">
                                                     <Setter.Value>
                                                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                            <GradientStop Color="#1a3a2a" Offset="0"/>
-                                                            <GradientStop Color="#0f2a1a" Offset="1"/>
+                                                            <GradientStop Color="#0d2818" Offset="0"/>
+                                                            <GradientStop Color="#071a10" Offset="1"/>
                                                         </LinearGradientBrush>
                                                     </Setter.Value>
                                                 </Setter>
-                                                <Setter Property="BorderBrush" Value="#2a5a3a"/>
+                                                <Setter Property="BorderBrush" Value="#1a3d2a"/>
                                                 <Setter Property="BorderThickness" Value="1"/>
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding Status}" Value="Warning">
                                                         <Setter Property="Background">
                                                             <Setter.Value>
                                                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                                    <GradientStop Color="#3a3a1a" Offset="0"/>
-                                                                    <GradientStop Color="#2a2a0f" Offset="1"/>
+                                                                    <GradientStop Color="#2d1f0d" Offset="0"/>
+                                                                    <GradientStop Color="#1a1207" Offset="1"/>
                                                                 </LinearGradientBrush>
                                                             </Setter.Value>
                                                         </Setter>
-                                                        <Setter Property="BorderBrush" Value="#5a5a2a"/>
+                                                        <Setter Property="BorderBrush" Value="#3d2a1a"/>
                                                     </DataTrigger>
                                                     <DataTrigger Binding="{Binding Status}" Value="Unsafe">
                                                         <Setter Property="Background">
                                                             <Setter.Value>
                                                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                                    <GradientStop Color="#3a1a2a" Offset="0"/>
-                                                                    <GradientStop Color="#2a0f1a" Offset="1"/>
+                                                                    <GradientStop Color="#2d0d0d" Offset="0"/>
+                                                                    <GradientStop Color="#1a0707" Offset="1"/>
                                                                 </LinearGradientBrush>
                                                             </Setter.Value>
                                                         </Setter>
-                                                        <Setter Property="BorderBrush" Value="#5a2a3a"/>
+                                                        <Setter Property="BorderBrush" Value="#3d1a1a"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -191,7 +415,7 @@
                                                 </Grid.ColumnDefinitions>
 
                                                 <!-- Icon -->
-                                                <Border Grid.Column="0" Background="#1e293b" CornerRadius="10"
+                                                <Border Grid.Column="0" Background="#1f2937" CornerRadius="10"
                                                         Width="40" Height="40" Margin="0,0,12,0">
                                                     <TextBlock Text="{Binding Icon}" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                                                Foreground="{StaticResource TextSecondaryBrush}"
@@ -208,15 +432,15 @@
                                                             <TextBlock.Style>
                                                                 <Style TargetType="TextBlock">
                                                                     <Setter Property="Text" Value="&#xE73E;"/>
-                                                                    <Setter Property="Foreground" Value="{StaticResource EmeraldSafeBrush}"/>
+                                                                    <Setter Property="Foreground" Value="{StaticResource StatusSafeBrush}"/>
                                                                     <Style.Triggers>
                                                                         <DataTrigger Binding="{Binding Status}" Value="Warning">
                                                                             <Setter Property="Text" Value="&#xE7BA;"/>
-                                                                            <Setter Property="Foreground" Value="{StaticResource AmberWarningBrush}"/>
+                                                                            <Setter Property="Foreground" Value="{StaticResource StatusWarningBrush}"/>
                                                                         </DataTrigger>
                                                                         <DataTrigger Binding="{Binding Status}" Value="Unsafe">
                                                                             <Setter Property="Text" Value="&#xE711;"/>
-                                                                            <Setter Property="Foreground" Value="{StaticResource RoseDangerBrush}"/>
+                                                                            <Setter Property="Foreground" Value="{StaticResource StatusDangerBrush}"/>
                                                                         </DataTrigger>
                                                                     </Style.Triggers>
                                                                 </Style>
@@ -225,13 +449,13 @@
                                                         <TextBlock Text="{Binding StatusText}" FontSize="11">
                                                             <TextBlock.Style>
                                                                 <Style TargetType="TextBlock">
-                                                                    <Setter Property="Foreground" Value="{StaticResource EmeraldSafeBrush}"/>
+                                                                    <Setter Property="Foreground" Value="{StaticResource StatusSafeBrush}"/>
                                                                     <Style.Triggers>
                                                                         <DataTrigger Binding="{Binding Status}" Value="Warning">
-                                                                            <Setter Property="Foreground" Value="{StaticResource AmberWarningBrush}"/>
+                                                                            <Setter Property="Foreground" Value="{StaticResource StatusWarningBrush}"/>
                                                                         </DataTrigger>
                                                                         <DataTrigger Binding="{Binding Status}" Value="Unsafe">
-                                                                            <Setter Property="Foreground" Value="{StaticResource RoseDangerBrush}"/>
+                                                                            <Setter Property="Foreground" Value="{StaticResource StatusDangerBrush}"/>
                                                                         </DataTrigger>
                                                                     </Style.Triggers>
                                                                 </Style>
@@ -246,15 +470,15 @@
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
                                                             <Setter Property="Text" Value="&#xE73E;"/>
-                                                            <Setter Property="Foreground" Value="{StaticResource EmeraldSafeBrush}"/>
+                                                            <Setter Property="Foreground" Value="{StaticResource StatusSafeBrush}"/>
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding Status}" Value="Warning">
                                                                     <Setter Property="Text" Value="&#xE7BA;"/>
-                                                                    <Setter Property="Foreground" Value="{StaticResource AmberWarningBrush}"/>
+                                                                    <Setter Property="Foreground" Value="{StaticResource StatusWarningBrush}"/>
                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding Status}" Value="Unsafe">
                                                                     <Setter Property="Text" Value="&#xE711;"/>
-                                                                    <Setter Property="Foreground" Value="{StaticResource RoseDangerBrush}"/>
+                                                                    <Setter Property="Foreground" Value="{StaticResource StatusDangerBrush}"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
@@ -262,17 +486,17 @@
                                                 </TextBlock>
                                             </Grid>
 
-                                            <!-- Expandable Details (shown via tooltip for now) -->
+                                            <!-- Expandable Details -->
                                             <Border Grid.Row="1" Margin="0,12,0,0" Padding="12" CornerRadius="8"
-                                                    Background="#0f172a" BorderBrush="#1e293b" BorderThickness="1">
+                                                    Background="#0a0f1a" BorderBrush="#1f2937" BorderThickness="1">
                                                 <StackPanel>
                                                     <TextBlock Text="{Binding CurrentMessage}" FontSize="12"
                                                                Foreground="{StaticResource TextSecondaryBrush}"
                                                                TextWrapping="Wrap"/>
-                                                    <Border Background="#1e293b" CornerRadius="6" Padding="10" Margin="0,10,0,0">
+                                                    <Border Background="#111827" CornerRadius="6" Padding="10" Margin="0,10,0,0">
                                                         <StackPanel Orientation="Horizontal">
                                                             <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="12"
-                                                                       Foreground="{StaticResource IndigoAccentBrush}"
+                                                                       Foreground="{StaticResource CyanPrimaryBrush}"
                                                                        VerticalAlignment="Top" Margin="0,1,8,0"/>
                                                             <TextBlock Text="{Binding Tip}" FontSize="11"
                                                                        Foreground="{StaticResource TextMutedBrush}"
@@ -289,7 +513,9 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Tools Grid -->
+                <!-- ═══════════════════════════════════════════════════════════════ -->
+                <!-- TOOLS GRID                                                       -->
+                <!-- ═══════════════════════════════════════════════════════════════ -->
                 <Grid Margin="0,0,0,24">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -298,17 +524,25 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Link Checker -->
-                    <Border Grid.Column="0" Style="{StaticResource DarkCardStyle}">
+                    <Border Grid.Column="0" Style="{StaticResource GlassCardStyle}">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                <Border Background="{StaticResource IndigoAccentBrush}" CornerRadius="10"
-                                        Width="44" Height="44" Margin="0,0,14,0">
-                                    <TextBlock Text="&#xE71B;" FontFamily="Segoe MDL2 Assets" FontSize="20"
+                                <Border CornerRadius="12" Width="48" Height="48" Margin="0,0,14,0">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#06b6d4" Offset="0"/>
+                                            <GradientStop Color="#0891b2" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <Border.Effect>
+                                        <DropShadowEffect BlurRadius="15" ShadowDepth="0" Opacity="0.4" Color="#06b6d4"/>
+                                    </Border.Effect>
+                                    <TextBlock Text="&#xE71B;" FontFamily="Segoe MDL2 Assets" FontSize="22"
                                                Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="Link Checker" FontSize="18" FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                                    <TextBlock Text="Link Scanner" FontSize="18" FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextBrightBrush}"/>
                                     <TextBlock Text="Detect phishing attempts" FontSize="12"
                                                Foreground="{StaticResource TextMutedBrush}"/>
                                 </StackPanel>
@@ -321,11 +555,11 @@
                             <TextBox x:Name="UrlInput" ui:ControlHelper.PlaceholderText="https://example.com"
                                      FontSize="14" Margin="0,0,0,12"/>
 
-                            <Button Content="Check Link" Style="{StaticResource AccentButtonStyle}"
-                                    HorizontalAlignment="Stretch" Height="40" Click="CheckLink_Click" Margin="0,0,0,12"/>
+                            <Button Content="Analyze URL" Style="{StaticResource CyberButtonStyle}"
+                                    HorizontalAlignment="Stretch" Height="42" Click="CheckLink_Click" Margin="0,0,0,12"/>
 
                             <Border x:Name="PhishingResultBorder" CornerRadius="10" Padding="14"
-                                    Background="#1a2744" Visibility="Collapsed">
+                                    Background="#0a1520" Visibility="Collapsed">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock x:Name="PhishingResultIcon" FontFamily="Segoe MDL2 Assets" FontSize="18"
                                                VerticalAlignment="Center" Margin="0,0,10,0"/>
@@ -337,18 +571,26 @@
                     </Border>
 
                     <!-- Fix My Screen -->
-                    <Border Grid.Column="2" Style="{StaticResource DarkCardStyle}">
+                    <Border Grid.Column="2" Style="{StaticResource GlassCardStyle}">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                <Border Background="{StaticResource RoseDangerBrush}" CornerRadius="10"
-                                        Width="44" Height="44" Margin="0,0,14,0">
-                                    <TextBlock Text="&#xE7F4;" FontFamily="Segoe MDL2 Assets" FontSize="20"
+                                <Border CornerRadius="12" Width="48" Height="48" Margin="0,0,14,0">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#ef4444" Offset="0"/>
+                                            <GradientStop Color="#dc2626" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <Border.Effect>
+                                        <DropShadowEffect BlurRadius="15" ShadowDepth="0" Opacity="0.4" Color="#ef4444"/>
+                                    </Border.Effect>
+                                    <TextBlock Text="&#xE7F4;" FontFamily="Segoe MDL2 Assets" FontSize="22"
                                                Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="Fix My Screen" FontSize="18" FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextPrimaryBrush}"/>
-                                    <TextBlock Text="Display troubleshooter" FontSize="12"
+                                    <TextBlock Text="Display Fix" FontSize="18" FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextBrightBrush}"/>
+                                    <TextBlock Text="Resolution troubleshooter" FontSize="12"
                                                Foreground="{StaticResource TextMutedBrush}"/>
                                 </StackPanel>
                             </StackPanel>
@@ -358,7 +600,7 @@
                                        TextWrapping="Wrap" Margin="0,0,0,16"/>
 
                             <Button Style="{StaticResource DangerButtonStyle}"
-                                    HorizontalAlignment="Stretch" Height="40" Click="FixScreen_Click">
+                                    HorizontalAlignment="Stretch" Height="42" Click="FixScreen_Click">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE72C;" FontFamily="Segoe MDL2 Assets" FontSize="14"
                                                VerticalAlignment="Center" Margin="0,0,8,0"/>
@@ -366,10 +608,10 @@
                                 </StackPanel>
                             </Button>
 
-                            <Border Background="#1a2744" CornerRadius="10" Padding="14" Margin="0,16,0,0">
+                            <Border Background="#0a1520" CornerRadius="10" Padding="14" Margin="0,16,0,0">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="16"
-                                               Foreground="{StaticResource AmberWarningBrush}"
+                                               Foreground="{StaticResource StatusWarningBrush}"
                                                VerticalAlignment="Center" Margin="0,0,10,0"/>
                                     <TextBlock Text="Requires administrator privileges" FontSize="12"
                                                Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center"/>
@@ -379,8 +621,10 @@
                     </Border>
                 </Grid>
 
-                <!-- Network Guardian -->
-                <Border Style="{StaticResource DarkCardStyle}">
+                <!-- ═══════════════════════════════════════════════════════════════ -->
+                <!-- NETWORK GUARDIAN                                                 -->
+                <!-- ═══════════════════════════════════════════════════════════════ -->
+                <Border Style="{StaticResource GlassCardStyle}">
                     <StackPanel>
                         <Grid Margin="0,0,0,16">
                             <Grid.ColumnDefinitions>
@@ -389,21 +633,29 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Orientation="Horizontal" Grid.Column="0">
-                                <Border Background="{StaticResource EmeraldSafeBrush}" CornerRadius="10"
-                                        Width="44" Height="44" Margin="0,0,14,0">
-                                    <TextBlock Text="&#xE968;" FontFamily="Segoe MDL2 Assets" FontSize="20"
+                                <Border CornerRadius="12" Width="48" Height="48" Margin="0,0,14,0">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#10b981" Offset="0"/>
+                                            <GradientStop Color="#059669" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <Border.Effect>
+                                        <DropShadowEffect BlurRadius="15" ShadowDepth="0" Opacity="0.4" Color="#10b981"/>
+                                    </Border.Effect>
+                                    <TextBlock Text="&#xE968;" FontFamily="Segoe MDL2 Assets" FontSize="22"
                                                Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="Network Guardian" FontSize="18" FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                                               Foreground="{StaticResource TextBrightBrush}"/>
                                     <TextBlock Text="Monitor active connections" FontSize="12"
                                                Foreground="{StaticResource TextMutedBrush}"/>
                                 </StackPanel>
                             </StackPanel>
 
-                            <Button Grid.Column="1" Style="{StaticResource AccentButtonStyle}"
-                                    Height="40" Click="RefreshNetwork_Click" Padding="16,0">
+                            <Button Grid.Column="1" Style="{StaticResource CyberButtonStyle}"
+                                    Height="42" Click="RefreshNetwork_Click" Padding="20,0">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE72C;" FontFamily="Segoe MDL2 Assets" FontSize="14"
                                                VerticalAlignment="Center" Margin="0,0,8,0"/>
@@ -416,25 +668,25 @@
                                    FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"
                                    TextWrapping="Wrap" Margin="0,0,0,16"/>
 
-                        <Border Background="#0f172a" CornerRadius="12" Padding="4">
-                            <ListView x:Name="NetworkList" Height="180"
+                        <Border Background="#0a0f1a" CornerRadius="12" Padding="4" BorderBrush="#1f2937" BorderThickness="1">
+                            <ListView x:Name="NetworkList" Height="200"
                                       Background="Transparent" BorderThickness="0"
                                       ScrollViewer.VerticalScrollBarVisibility="Auto">
                                 <ListView.Resources>
                                     <Style TargetType="GridViewColumnHeader">
-                                        <Setter Property="Background" Value="#1e293b"/>
+                                        <Setter Property="Background" Value="#111827"/>
                                         <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
                                         <Setter Property="Padding" Value="12,10"/>
                                         <Setter Property="FontWeight" Value="SemiBold"/>
-                                        <Setter Property="FontSize" Value="12"/>
+                                        <Setter Property="FontSize" Value="11"/>
                                         <Setter Property="BorderThickness" Value="0"/>
                                     </Style>
                                 </ListView.Resources>
                                 <ListView.View>
                                     <GridView>
-                                        <GridViewColumn Header="APPLICATION" DisplayMemberBinding="{Binding ProcessName}" Width="200"/>
-                                        <GridViewColumn Header="REMOTE ADDRESS" DisplayMemberBinding="{Binding RemoteAddress}" Width="280"/>
-                                        <GridViewColumn Header="STATE" DisplayMemberBinding="{Binding State}" Width="120"/>
+                                        <GridViewColumn Header="APPLICATION" DisplayMemberBinding="{Binding ProcessName}" Width="240"/>
+                                        <GridViewColumn Header="REMOTE ADDRESS" DisplayMemberBinding="{Binding RemoteAddress}" Width="320"/>
+                                        <GridViewColumn Header="STATE" DisplayMemberBinding="{Binding State}" Width="140"/>
                                     </GridView>
                                 </ListView.View>
                             </ListView>
@@ -442,11 +694,17 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Footer -->
-                <Border Margin="0,24,0,0" Padding="16">
+                <!-- ═══════════════════════════════════════════════════════════════ -->
+                <!-- FOOTER                                                           -->
+                <!-- ═══════════════════════════════════════════════════════════════ -->
+                <Border Margin="0,32,0,0" Padding="16">
                     <StackPanel HorizontalAlignment="Center">
-                        <TextBlock Text="Powered by CyberShield Engine" FontSize="12"
-                                   Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="Powered by " FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+                            <TextBlock Text="CyberShield Engine" FontSize="12" Foreground="{StaticResource CyanPrimaryBrush}" FontWeight="SemiBold"/>
+                        </StackPanel>
+                        <TextBlock Text="Premium Cyber-Noir Edition" FontSize="10"
+                                   Foreground="{StaticResource TextDimBrush}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Border>
 
