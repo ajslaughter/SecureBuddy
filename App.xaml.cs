@@ -6,11 +6,73 @@ namespace CyberShieldBuddy
 {
     public partial class App : Application
     {
+        private static readonly string AppDataFolder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "CyberShieldBuddy");
+
+        private static readonly string FirstRunFlagFile = Path.Combine(AppDataFolder, ".first_run_complete");
+
         public App()
         {
             // Catch all unhandled exceptions
             this.DispatcherUnhandledException += App_DispatcherUnhandledException;
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+        }
+
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+
+            // Check if this is the first run
+            if (IsFirstRun())
+            {
+                ShowWelcomeDialog();
+                MarkFirstRunComplete();
+            }
+        }
+
+        public static bool IsFirstRun()
+        {
+            return !File.Exists(FirstRunFlagFile);
+        }
+
+        private void ShowWelcomeDialog()
+        {
+            try
+            {
+                var welcomeDialog = new WelcomeDialog();
+                welcomeDialog.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                AuditLogger.Log($"Failed to show welcome dialog: {ex.Message}", "ERROR");
+            }
+        }
+
+        private void MarkFirstRunComplete()
+        {
+            try
+            {
+                Directory.CreateDirectory(AppDataFolder);
+                File.WriteAllText(FirstRunFlagFile, DateTime.Now.ToString("o"));
+                AuditLogger.Log("First run tutorial completed", "INFO");
+            }
+            catch (Exception ex)
+            {
+                AuditLogger.Log($"Failed to mark first run complete: {ex.Message}", "ERROR");
+            }
+        }
+
+        public static void ResetFirstRun()
+        {
+            try
+            {
+                if (File.Exists(FirstRunFlagFile))
+                {
+                    File.Delete(FirstRunFlagFile);
+                }
+            }
+            catch { }
         }
 
         private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)

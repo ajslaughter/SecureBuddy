@@ -4,10 +4,85 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.modernwpf.com/2019"
+        xmlns:local="clr-namespace:CyberShieldBuddy"
         mc:Ignorable="d"
-        Title="CyberShield Buddy" Height="800" Width="1000"
+        Title="CyberShield Buddy" Height="850" Width="1050"
         WindowStartupLocation="CenterScreen"
         ui:WindowHelper.UseModernWindowStyle="True">
+
+    <Window.Resources>
+        <!-- Security Check Card Style -->
+        <Style x:Key="SecurityCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+
+        <!-- Clickable Card Style -->
+        <Style x:Key="ClickableCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundListLowBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Link Result Card Style -->
+        <DataTemplate x:Key="LinkResultTemplate">
+            <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                    CornerRadius="6" Padding="12" Margin="0,0,0,8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="{Binding Icon}" FontSize="24" VerticalAlignment="Top" Margin="0,0,12,0"/>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold"
+                                   Foreground="{Binding Color}" Margin="0,0,0,4"/>
+                        <TextBlock Text="{Binding Description}" TextWrapping="Wrap"
+                                   Opacity="0.8" FontSize="12"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <!-- FAQ Item Template -->
+        <DataTemplate x:Key="FaqItemTemplate">
+            <Border Style="{StaticResource ClickableCardStyle}"
+                    MouseLeftButtonUp="FaqItem_Click" Tag="{Binding}">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{Binding Question}" FontWeight="SemiBold"
+                                   TextWrapping="Wrap" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="+" FontSize="18" FontWeight="Bold"
+                                   VerticalAlignment="Center" Opacity="0.5"
+                                   Visibility="{Binding IsExpanded, Converter={StaticResource InverseBoolToVisConverter}}"/>
+                        <TextBlock Grid.Column="1" Text="-" FontSize="18" FontWeight="Bold"
+                                   VerticalAlignment="Center" Opacity="0.5"
+                                   Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVisConverter}}"/>
+                    </Grid>
+                    <TextBlock Text="{Binding Answer}" TextWrapping="Wrap" Margin="0,10,0,0"
+                               Opacity="0.8" FontSize="13" LineHeight="20"
+                               Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVisConverter}}"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <!-- Bool to Visibility Converters -->
+        <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
+        <local:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisConverter"/>
+    </Window.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -16,110 +91,356 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <StackPanel Grid.Row="0" Margin="0,20,0,20">
-            <TextBlock Text="CyberShield Buddy" Style="{StaticResource TitleTextBlockStyle}" 
-                       HorizontalAlignment="Center" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
-            <TextBlock Text="Your Personal Cybersecurity Coach" 
-                       HorizontalAlignment="Center" Style="{StaticResource SubtitleTextBlockStyle}" Opacity="0.6"/>
-        </StackPanel>
+        <Border Grid.Row="0" Background="{DynamicResource SystemControlBackgroundAccentBrush}" Padding="20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="CyberShield Buddy" FontSize="24" FontWeight="Bold"
+                               Foreground="White"/>
+                    <TextBlock Text="Your Personal Cybersecurity Coach"
+                               Foreground="White" Opacity="0.8" FontSize="13"/>
+                </StackPanel>
+                <Button Grid.Column="1" Content="Show Tutorial" Click="ShowTutorial_Click"
+                        Background="Transparent" Foreground="White" BorderThickness="1"
+                        BorderBrush="White" Opacity="0.8" VerticalAlignment="Center"
+                        ToolTip="View the welcome tutorial again"/>
+            </Grid>
+        </Border>
 
-        <ScrollViewer Grid.Row="1" Padding="20">
-            <StackPanel MaxWidth="800" HorizontalAlignment="Center">
-                
-                <!-- Health Monitor Section -->
-                <Border CornerRadius="12" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" Padding="30" Margin="0,0,0,20">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
-                    </Border.Effect>
-                    <StackPanel>
-                        <TextBlock Text="System Health" Style="{StaticResource HeaderTextBlockStyle}" HorizontalAlignment="Center"/>
-                        
-                        <!-- Visual Score Indicator -->
-                        <Grid Margin="0,20">
-                            <Ellipse Width="150" Height="150" StrokeThickness="8" Stroke="{DynamicResource SystemControlBackgroundBaseLowBrush}"/>
-                            <Ellipse x:Name="HealthStatusRing" Width="150" Height="150" StrokeThickness="8" Stroke="Gray"/>
-                            
-                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <TextBlock x:Name="ScoreText" Text="?" FontSize="48" FontWeight="Bold" HorizontalAlignment="Center"/>
-                                <TextBlock x:Name="StatusText" Text="Unknown" HorizontalAlignment="Center" Opacity="0.7"/>
+        <!-- Tab Control -->
+        <ui:TabControl Grid.Row="1" x:Name="MainTabControl">
+
+            <!-- Security Tab -->
+            <ui:TabItem Header="Security">
+                <ScrollViewer Padding="20">
+                    <StackPanel MaxWidth="850" HorizontalAlignment="Center">
+
+                        <!-- Health Monitor Section -->
+                        <Border CornerRadius="12" Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                                Padding="30" Margin="0,0,0,20">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
+                            </Border.Effect>
+                            <StackPanel>
+                                <TextBlock Text="System Health" Style="{StaticResource HeaderTextBlockStyle}"
+                                           HorizontalAlignment="Center"/>
+
+                                <!-- Visual Score Indicator with Animation -->
+                                <Grid Margin="0,20">
+                                    <Ellipse Width="150" Height="150" StrokeThickness="8"
+                                             Stroke="{DynamicResource SystemControlBackgroundBaseLowBrush}"/>
+                                    <Ellipse x:Name="HealthStatusRing" Width="150" Height="150"
+                                             StrokeThickness="8" Stroke="Gray"
+                                             RenderTransformOrigin="0.5,0.5">
+                                        <Ellipse.RenderTransform>
+                                            <RotateTransform x:Name="RingRotation" Angle="0"/>
+                                        </Ellipse.RenderTransform>
+                                    </Ellipse>
+
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <TextBlock x:Name="ScoreText" Text="?" FontSize="48"
+                                                   FontWeight="Bold" HorizontalAlignment="Center"/>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <TextBlock x:Name="StatusEmoji" Text="" FontSize="16"
+                                                       Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                            <TextBlock x:Name="StatusText" Text="Click Scan to Start"
+                                                       HorizontalAlignment="Center" Opacity="0.7"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
+
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+                                    <Button x:Name="ScanButton" Content="Scan Now" Width="180" Height="50"
+                                            Click="ScanButton_Click" FontSize="18" Margin="0,0,10,0"
+                                            ToolTip="Analyze your system's security settings"/>
+                                    <Button x:Name="HardenButton" Content="Harden Now" Width="180" Height="50"
+                                            Click="HardenButton_Click" FontSize="18"
+                                            Background="#27AE60" Foreground="White" BorderThickness="0"
+                                            ToolTip="Apply recommended security settings (requires admin)"/>
+                                </StackPanel>
+
+                                <!-- Expandable Security Checks -->
+                                <TextBlock Text="Security Checks" FontWeight="SemiBold" FontSize="16"
+                                           Margin="0,20,0,10"/>
+                                <TextBlock Text="Click any item to learn more about why it matters."
+                                           Opacity="0.6" FontSize="12" Margin="0,0,0,15"/>
+
+                                <ItemsControl x:Name="SecurityChecksList">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{StaticResource ClickableCardStyle}"
+                                                    MouseLeftButtonUp="SecurityCheck_Click" Tag="{Binding}">
+                                                <Border.ToolTip>
+                                                    <ToolTip Content="{Binding Tooltip}" MaxWidth="300"/>
+                                                </Border.ToolTip>
+                                                <StackPanel>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <TextBlock Text="{Binding StatusIcon}" FontSize="20"
+                                                                   VerticalAlignment="Center" Margin="0,0,12,0"/>
+
+                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold"/>
+                                                            <TextBlock Text="{Binding Description}" Opacity="0.7"
+                                                                       FontSize="12" Margin="0,2,0,0"/>
+                                                        </StackPanel>
+
+                                                        <TextBlock Grid.Column="2" Text="+" FontSize="18"
+                                                                   FontWeight="Bold" VerticalAlignment="Center"
+                                                                   Opacity="0.5"
+                                                                   Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVisConverter}, ConverterParameter=Inverse}"/>
+                                                    </Grid>
+
+                                                    <!-- Expandable "Why this matters" section -->
+                                                    <Border Background="{DynamicResource SystemControlBackgroundListLowBrush}"
+                                                            CornerRadius="6" Padding="12" Margin="0,12,0,0"
+                                                            Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVisConverter}}">
+                                                        <StackPanel>
+                                                            <TextBlock Text="Why this matters:" FontWeight="SemiBold"
+                                                                       FontSize="12" Margin="0,0,0,5"
+                                                                       Foreground="{DynamicResource SystemControlForegroundAccentBrush}"/>
+                                                            <TextBlock Text="{Binding WhyItMatters}" TextWrapping="Wrap"
+                                                                       FontSize="12" LineHeight="18" Opacity="0.85"/>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                             </StackPanel>
-                        </Grid>
+                        </Border>
 
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
-                            <Button x:Name="ScanButton" Content="Scan Now" Width="180" Height="50" 
-                                    Click="ScanButton_Click" FontSize="18" Margin="0,0,10,0"/>
-                            <Button x:Name="HardenButton" Content="Harden Now" Width="180" Height="50" 
-                                    Click="HardenButton_Click" FontSize="18" 
-                                    Background="#27AE60" Foreground="White" BorderThickness="0"/>
-                        </StackPanel>
-                                
-                        <ItemsControl x:Name="IssuesList" Margin="0,20,0,0">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding}" Foreground="#E74C3C" HorizontalAlignment="Center" Margin="0,2"/>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
                     </StackPanel>
-                </Border>
+                </ScrollViewer>
+            </ui:TabItem>
 
-                <!-- Tools Grid -->
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="20"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+            <!-- Tools Tab -->
+            <ui:TabItem Header="Tools">
+                <ScrollViewer Padding="20">
+                    <StackPanel MaxWidth="850" HorizontalAlignment="Center">
 
-                    <!-- Phishing Buster -->
-                    <Border Grid.Column="0" CornerRadius="12" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" Padding="20">
-                         <Border.Effect>
-                            <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
-                        </Border.Effect>
-                        <StackPanel>
-                            <TextBlock Text="🔗 Link Checker" Style="{StaticResource SubheaderTextBlockStyle}" Margin="0,0,0,10"/>
-                            <TextBlock Text="Paste a link to check for phishing red flags." Opacity="0.6" TextWrapping="Wrap" Margin="0,0,0,10"/>
-                            <TextBox x:Name="UrlInput" ui:ControlHelper.PlaceholderText="https://example.com" Margin="0,0,0,10"/>
-                            <Button Content="Check Link" HorizontalAlignment="Stretch" Click="CheckLink_Click" Margin="0,0,0,10"/>
-                            <TextBlock x:Name="PhishingResult" TextWrapping="Wrap" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" FontWeight="SemiBold"/>
-                        </StackPanel>
-                    </Border>
+                        <!-- Link Checker -->
+                        <Border CornerRadius="12" Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                                Padding="25" Margin="0,0,0,20">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
+                            </Border.Effect>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <TextBlock Text="🔗" FontSize="24" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Link Checker" Style="{StaticResource SubheaderTextBlockStyle}"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
 
-                    <!-- Fix My Screen -->
-                    <Border Grid.Column="2" CornerRadius="12" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" Padding="20">
-                         <Border.Effect>
-                            <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
-                        </Border.Effect>
-                        <StackPanel>
-                            <TextBlock Text="Fix My Screen" Style="{StaticResource SubheaderTextBlockStyle}" Margin="0,0,0,10"/>
-                            <TextBlock Text="Screen glitching or multi-monitor issues?" Opacity="0.6" TextWrapping="Wrap" Margin="0,0,0,10"/>
-                            <Button Content="Fix Resolution" HorizontalAlignment="Stretch" Click="FixScreen_Click" Background="#E74C3C" Foreground="White" BorderThickness="0"/>
-                        </StackPanel>
-                    </Border>
-                </Grid>
+                                <TextBlock Text="Paste a suspicious link to check for common phishing red flags."
+                                           Opacity="0.7" TextWrapping="Wrap" Margin="0,0,0,15"/>
 
-                <!-- Network Guardian -->
-                <Border CornerRadius="12" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" Padding="20" Margin="0,20,0,0">
-                     <Border.Effect>
-                        <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
-                    </Border.Effect>
-                    <StackPanel>
-                        <TextBlock Text="Network Guardian" Style="{StaticResource SubheaderTextBlockStyle}" Margin="0,0,0,10"/>
-                        <TextBlock Text="Active connections on your device." Opacity="0.6" Margin="0,0,0,10"/>
-                        <Button Content="Refresh Map" Click="RefreshNetwork_Click" HorizontalAlignment="Left" Margin="0,0,0,10"/>
-                        <ListView x:Name="NetworkList" Height="150" ScrollViewer.VerticalScrollBarVisibility="Auto">
-                            <ListView.View>
-                                <GridView>
-                                    <GridViewColumn Header="App" DisplayMemberBinding="{Binding ProcessName}" Width="150"/>
-                                    <GridViewColumn Header="Remote Address" DisplayMemberBinding="{Binding RemoteAddress}" Width="150"/>
-                                    <GridViewColumn Header="State" DisplayMemberBinding="{Binding State}" Width="100"/>
-                                </GridView>
-                            </ListView.View>
-                        </ListView>
+                                <!-- Disclaimer -->
+                                <Border Background="#FFF3CD" CornerRadius="6" Padding="12" Margin="0,0,0,15">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="⚠️" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Top"/>
+                                        <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="#856404">
+                                            <Run FontWeight="SemiBold">Disclaimer:</Run>
+                                            <Run>This tool only checks URL format and structure. It cannot verify if a website is actually safe or malicious. Always be cautious when clicking links from unknown sources.</Run>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+                                <TextBox x:Name="UrlInput" ui:ControlHelper.PlaceholderText="https://example.com"
+                                         Margin="0,0,0,10" FontSize="14"/>
+                                <Button Content="Check Link" HorizontalAlignment="Left" Click="CheckLink_Click"
+                                        Margin="0,0,0,15" Padding="20,8"
+                                        ToolTip="Analyze URL for suspicious patterns"/>
+
+                                <!-- Results Area -->
+                                <ItemsControl x:Name="LinkCheckResults"
+                                              ItemTemplate="{StaticResource LinkResultTemplate}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Fix My Screen -->
+                        <Border CornerRadius="12" Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                                Padding="25">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
+                            </Border.Effect>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <TextBlock Text="🖥️" FontSize="24" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Fix My Screen" Style="{StaticResource SubheaderTextBlockStyle}"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <TextBlock Text="Having display glitches or multi-monitor issues? This clears the Windows display configuration cache."
+                                           Opacity="0.7" TextWrapping="Wrap" Margin="0,0,0,15"/>
+                                <Button Content="Fix Resolution" HorizontalAlignment="Left" Click="FixScreen_Click"
+                                        Background="#E74C3C" Foreground="White" BorderThickness="0" Padding="20,8"
+                                        ToolTip="Reset display configuration cache (may require restart)"/>
+                            </StackPanel>
+                        </Border>
+
                     </StackPanel>
-                </Border>
+                </ScrollViewer>
+            </ui:TabItem>
 
-            </StackPanel>
-        </ScrollViewer>
+            <!-- Network Tab -->
+            <ui:TabItem Header="Network">
+                <ScrollViewer Padding="20">
+                    <StackPanel MaxWidth="900" HorizontalAlignment="Center">
+
+                        <Border CornerRadius="12" Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                                Padding="25">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
+                            </Border.Effect>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <TextBlock Text="🌐" FontSize="24" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Network Guardian" Style="{StaticResource SubheaderTextBlockStyle}"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <!-- Explanatory Text -->
+                                <Border Background="{DynamicResource SystemControlBackgroundListLowBrush}"
+                                        CornerRadius="6" Padding="12" Margin="0,0,0,15">
+                                    <TextBlock TextWrapping="Wrap" FontSize="13" Opacity="0.85">
+                                        <Run FontWeight="SemiBold">What is this?</Run>
+                                        <LineBreak/>
+                                        <Run>This shows all applications currently connected to the internet on your computer. You can see which programs are communicating with external servers.</Run>
+                                        <LineBreak/><LineBreak/>
+                                        <Run FontWeight="SemiBold">Risk Levels:</Run>
+                                        <LineBreak/>
+                                        <Run Foreground="#27AE60">Low</Run><Run> - Known safe applications (browsers, system processes)</Run>
+                                        <LineBreak/>
+                                        <Run Foreground="#F39C12">Medium</Run><Run> - Unrecognized but not necessarily dangerous</Run>
+                                        <LineBreak/>
+                                        <Run Foreground="#E74C3C">High</Run><Run> - Potentially suspicious process names</Run>
+                                    </TextBlock>
+                                </Border>
+
+                                <Button Content="Refresh Connections" Click="RefreshNetwork_Click"
+                                        HorizontalAlignment="Left" Margin="0,0,0,15" Padding="15,8"
+                                        ToolTip="Scan for active network connections"/>
+
+                                <ListView x:Name="NetworkList" Height="300"
+                                          ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                    <ListView.View>
+                                        <GridView>
+                                            <GridViewColumn Header="App" Width="140">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding ProcessName}"
+                                                                   ToolTip="{Binding ProcessName}"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                            <GridViewColumn Header="Remote Address" Width="140">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding RemoteAddress}"
+                                                                   ToolTip="{Binding RemoteAddress}"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                            <GridViewColumn Header="Port" DisplayMemberBinding="{Binding RemotePort}" Width="60"/>
+                                            <GridViewColumn Header="State" DisplayMemberBinding="{Binding State}" Width="90"/>
+                                            <GridViewColumn Header="Risk" Width="80">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Risk}"
+                                                                   Foreground="{Binding RiskColor}"
+                                                                   FontWeight="SemiBold"/>
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                        </GridView>
+                                    </ListView.View>
+                                </ListView>
+
+                                <TextBlock Text="Tip: If you see an unknown application with 'High' risk, research its name online or consider running an antivirus scan."
+                                           FontSize="12" Opacity="0.6" TextWrapping="Wrap" Margin="0,15,0,0" FontStyle="Italic"/>
+                            </StackPanel>
+                        </Border>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </ui:TabItem>
+
+            <!-- Learn Tab -->
+            <ui:TabItem Header="Learn">
+                <ScrollViewer Padding="20">
+                    <StackPanel MaxWidth="800" HorizontalAlignment="Center">
+
+                        <!-- FAQ Section -->
+                        <Border CornerRadius="12" Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                                Padding="25" Margin="0,0,0,20">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
+                            </Border.Effect>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                                    <TextBlock Text="❓" FontSize="24" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Frequently Asked Questions"
+                                               Style="{StaticResource SubheaderTextBlockStyle}"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <ItemsControl x:Name="FaqList" ItemTemplate="{StaticResource FaqItemTemplate}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Security Tips Section -->
+                        <Border CornerRadius="12" Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                                Padding="25">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
+                            </Border.Effect>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                                    <TextBlock Text="💡" FontSize="24" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Security Tips for Beginners"
+                                               Style="{StaticResource SubheaderTextBlockStyle}"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+
+                                <ItemsControl x:Name="TipsList">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{DynamicResource SystemControlBackgroundListLowBrush}"
+                                                    CornerRadius="6" Padding="15" Margin="0,0,0,10">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{Binding Icon}" FontSize="20"
+                                                               VerticalAlignment="Top" Margin="0,0,12,0"/>
+                                                    <StackPanel Grid.Column="1">
+                                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold"
+                                                                   Margin="0,0,0,5"/>
+                                                        <TextBlock Text="{Binding Description}" TextWrapping="Wrap"
+                                                                   Opacity="0.8" FontSize="13" LineHeight="20"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </ui:TabItem>
+
+        </ui:TabControl>
     </Grid>
 </Window>

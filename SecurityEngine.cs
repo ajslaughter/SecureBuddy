@@ -62,6 +62,52 @@ namespace CyberShieldBuddy
             public string State { get; set; } = "";
             public int PID { get; set; }
             public string ProcessName { get; set; } = "";
+            public string Risk { get; set; } = "Unknown";
+            public string RiskColor { get; set; } = "Gray";
+        }
+
+        // Known safe processes for risk assessment
+        private static readonly HashSet<string> KnownSafeProcesses = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "System", "svchost", "MsMpEng", "SecurityHealthService", "WmiPrvSE",
+            "chrome", "firefox", "msedge", "brave", "opera",
+            "outlook", "OUTLOOK", "Teams", "Slack", "Discord",
+            "OneDrive", "Dropbox", "GoogleDrive",
+            "Code", "devenv", "rider64", "idea64",
+            "WindowsTerminal", "powershell", "pwsh",
+            "explorer", "SearchHost", "RuntimeBroker",
+            "msteams", "Zoom", "webex"
+        };
+
+        private static readonly HashSet<string> SuspiciousProcesses = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "nc", "ncat", "netcat", "meterpreter", "mimikatz",
+            "psexec", "paexec", "wmic"
+        };
+
+        public static string AssessProcessRisk(string processName)
+        {
+            if (string.IsNullOrWhiteSpace(processName) || processName == "Unknown")
+                return "Unknown";
+
+            if (SuspiciousProcesses.Contains(processName))
+                return "High";
+
+            if (KnownSafeProcesses.Contains(processName))
+                return "Low";
+
+            return "Medium";
+        }
+
+        public static string GetRiskColor(string risk)
+        {
+            return risk switch
+            {
+                "Low" => "#27AE60",
+                "Medium" => "#F39C12",
+                "High" => "#E74C3C",
+                _ => "#7F8C8D"
+            };
         }
 
         // --- Hardening Checks ---
@@ -261,7 +307,7 @@ namespace CyberShieldBuddy
         public static int CalculateHardeningScore()
         {
             int score = 0;
-            int totalChecks = 6; 
+            int totalChecks = 6;
 
             if (CheckRDPStatus()) score++;
             if (CheckSMBv1()) score++;
@@ -271,6 +317,79 @@ namespace CyberShieldBuddy
             if (CheckCredentialGuard()) score++;
 
             return (int)((double)score / totalChecks * 100);
+        }
+
+        public static List<SecurityCheckItem> GetSecurityChecks()
+        {
+            return new List<SecurityCheckItem>
+            {
+                new SecurityCheckItem
+                {
+                    Id = "rdp",
+                    Title = "Remote Desktop (RDP)",
+                    Description = CheckRDPStatus() ? "Remote Desktop is disabled - Good!" : "Remote Desktop is enabled - Consider disabling",
+                    WhyItMatters = "Remote Desktop allows other computers to connect to and control your PC over a network. " +
+                                   "While useful for IT support, leaving it enabled makes your computer a target for hackers " +
+                                   "who try to guess your password. If you don't actively use Remote Desktop, it's safer to disable it.",
+                    Tooltip = "Remote Desktop allows connections to your PC from other computers",
+                    IsSecure = CheckRDPStatus()
+                },
+                new SecurityCheckItem
+                {
+                    Id = "smb1",
+                    Title = "SMBv1 Protocol",
+                    Description = CheckSMBv1() ? "SMBv1 is disabled - Good!" : "SMBv1 is enabled - Security risk!",
+                    WhyItMatters = "SMBv1 is an old file sharing protocol from the 1980s with serious security flaws. " +
+                                   "The infamous WannaCry ransomware attack in 2017 spread using SMBv1 vulnerabilities, " +
+                                   "affecting over 200,000 computers worldwide. Modern Windows uses SMBv2/SMBv3 which are much safer.",
+                    Tooltip = "Old file sharing protocol vulnerable to ransomware like WannaCry",
+                    IsSecure = CheckSMBv1()
+                },
+                new SecurityCheckItem
+                {
+                    Id = "guest",
+                    Title = "Guest Account",
+                    Description = CheckGuestAccount() ? "Guest account is disabled - Good!" : "Guest account is enabled - Security risk!",
+                    WhyItMatters = "The Guest account allows anyone to use your computer without a password. " +
+                                   "While it has limited permissions, it can still be used by attackers as a foothold " +
+                                   "to access your system or network. Unless you specifically need guest access, keep it disabled.",
+                    Tooltip = "Allows anonymous access without a password",
+                    IsSecure = CheckGuestAccount()
+                },
+                new SecurityCheckItem
+                {
+                    Id = "lsa",
+                    Title = "LSA Protection",
+                    Description = CheckLSAProtection() ? "LSA Protection is enabled - Good!" : "LSA Protection is not enabled",
+                    WhyItMatters = "LSA (Local Security Authority) stores your Windows passwords and authentication tokens. " +
+                                   "LSA Protection prevents malicious programs from reading this sensitive data. " +
+                                   "Without protection, hackers using tools like Mimikatz could steal your passwords from memory.",
+                    Tooltip = "Protects your saved Windows passwords",
+                    IsSecure = CheckLSAProtection()
+                },
+                new SecurityCheckItem
+                {
+                    Id = "autologon",
+                    Title = "Auto Logon",
+                    Description = CheckAutoLogon() ? "Auto Logon is disabled - Good!" : "Auto Logon is enabled - Security risk!",
+                    WhyItMatters = "Auto Logon lets Windows automatically log in without asking for a password. " +
+                                   "This means anyone with physical access to your computer can use it immediately. " +
+                                   "Your password may also be stored in the registry where it could be read by malware.",
+                    Tooltip = "Logs in automatically without requiring a password",
+                    IsSecure = CheckAutoLogon()
+                },
+                new SecurityCheckItem
+                {
+                    Id = "credguard",
+                    Title = "Credential Guard",
+                    Description = CheckCredentialGuard() ? "Credential Guard is enabled - Excellent!" : "Credential Guard is not enabled",
+                    WhyItMatters = "Credential Guard uses hardware virtualization to create a secure container for your passwords. " +
+                                   "Even if malware gains administrator access, it cannot steal credentials protected by Credential Guard. " +
+                                   "Note: This is an enterprise feature that requires specific hardware (TPM, UEFI) and Windows editions.",
+                    Tooltip = "Enterprise-grade password protection using hardware virtualization",
+                    IsSecure = CheckCredentialGuard()
+                }
+            };
         }
 
         public static List<string> AuditFieldCompliance()
@@ -380,6 +499,8 @@ namespace CyberShieldBuddy
                     {
                         MIB_TCPROW_OWNER_PID row = Marshal.PtrToStructure<MIB_TCPROW_OWNER_PID>(rowPtr);
                         
+                        string processName = GetProcessName((int)row.owningPid);
+                        string risk = AssessProcessRisk(processName);
                         connections.Add(new NetworkConnection
                         {
                             LocalAddress = IPToString(row.localAddr),
@@ -388,7 +509,9 @@ namespace CyberShieldBuddy
                             RemotePort = PortToHostOrder(row.remotePort),
                             State = ((TcpState)row.state).ToString(),
                             PID = (int)row.owningPid,
-                            ProcessName = GetProcessName((int)row.owningPid)
+                            ProcessName = processName,
+                            Risk = risk,
+                            RiskColor = GetRiskColor(risk)
                         });
 
                         rowPtr = (IntPtr)((long)rowPtr + Marshal.SizeOf(row));
@@ -551,6 +674,152 @@ namespace CyberShieldBuddy
                 return "ℹ️ Note: Unusually long URL. Verify the domain carefully.";
 
             return "✓ No obvious format issues detected.\n⚠️ This does NOT guarantee the site is safe. Always verify the domain name.";
+        }
+
+        public static List<LinkCheckResult> AnalyzeUrlDetailed(string url)
+        {
+            var results = new List<LinkCheckResult>();
+
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                results.Add(new LinkCheckResult
+                {
+                    Icon = "❓",
+                    Title = "No URL Provided",
+                    Description = "Please enter a URL to check.",
+                    Color = "#7F8C8D",
+                    Severity = "Info"
+                });
+                return results;
+            }
+
+            // Check HTTPS
+            if (url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            {
+                results.Add(new LinkCheckResult
+                {
+                    Icon = "🔒",
+                    Title = "Secure Connection (HTTPS)",
+                    Description = "This URL uses HTTPS encryption, which protects data in transit.",
+                    Color = "#27AE60",
+                    Severity = "Safe"
+                });
+            }
+            else if (url.StartsWith("http://", StringComparison.OrdinalIgnoreCase))
+            {
+                results.Add(new LinkCheckResult
+                {
+                    Icon = "🔓",
+                    Title = "Insecure Connection (HTTP)",
+                    Description = "This URL uses unencrypted HTTP. Data sent to this site could be intercepted. Avoid entering passwords or personal information.",
+                    Color = "#E74C3C",
+                    Severity = "Warning"
+                });
+            }
+            else
+            {
+                results.Add(new LinkCheckResult
+                {
+                    Icon = "⚠️",
+                    Title = "Invalid URL Format",
+                    Description = "The URL should start with http:// or https://",
+                    Color = "#E74C3C",
+                    Severity = "Warning"
+                });
+                return results;
+            }
+
+            // Check for IP address
+            if (System.Text.RegularExpressions.Regex.IsMatch(url, @"https?://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"))
+            {
+                results.Add(new LinkCheckResult
+                {
+                    Icon = "🚨",
+                    Title = "Raw IP Address Detected",
+                    Description = "Legitimate websites typically use domain names (like google.com), not raw IP addresses. Phishing sites often use IP addresses to hide their identity.",
+                    Color = "#E74C3C",
+                    Severity = "Warning"
+                });
+            }
+
+            // Check for @ symbol
+            if (url.Contains("@"))
+            {
+                results.Add(new LinkCheckResult
+                {
+                    Icon = "🚨",
+                    Title = "Suspicious @ Symbol",
+                    Description = "The @ symbol in URLs can be used to make fake links look legitimate. For example, 'http://google.com@evil.com' actually goes to evil.com, not Google.",
+                    Color = "#E74C3C",
+                    Severity = "Warning"
+                });
+            }
+
+            // Check for unusual length
+            if (url.Length > 75)
+            {
+                results.Add(new LinkCheckResult
+                {
+                    Icon = "📏",
+                    Title = "Unusually Long URL",
+                    Description = "Very long URLs can be used to hide the true destination. Look carefully at the domain name (the part right after https://).",
+                    Color = "#F39C12",
+                    Severity = "Caution"
+                });
+            }
+
+            // Check for common phishing patterns in domain
+            var lowerUrl = url.ToLowerInvariant();
+            var suspiciousPatterns = new[] { "login", "signin", "verify", "secure", "account", "update", "confirm" };
+            foreach (var pattern in suspiciousPatterns)
+            {
+                if (lowerUrl.Contains(pattern) && !lowerUrl.Contains("microsoft.com") && !lowerUrl.Contains("google.com") && !lowerUrl.Contains("apple.com"))
+                {
+                    results.Add(new LinkCheckResult
+                    {
+                        Icon = "🔍",
+                        Title = $"Contains '{pattern}' Keyword",
+                        Description = $"The URL contains the word '{pattern}' which is commonly used in phishing attempts. Verify this is the official website before entering any information.",
+                        Color = "#F39C12",
+                        Severity = "Caution"
+                    });
+                    break;
+                }
+            }
+
+            // Check for multiple subdomains
+            try
+            {
+                var uri = new Uri(url);
+                var parts = uri.Host.Split('.');
+                if (parts.Length > 3)
+                {
+                    results.Add(new LinkCheckResult
+                    {
+                        Icon = "🔗",
+                        Title = "Multiple Subdomains",
+                        Description = "This URL has many subdomains. Phishers sometimes use this to make 'paypal.com.fake.evil.com' look like PayPal. Check the main domain carefully.",
+                        Color = "#F39C12",
+                        Severity = "Caution"
+                    });
+                }
+            }
+            catch { }
+
+            // If no issues found, add positive result
+            if (results.Count == 1 && results[0].Severity == "Safe")
+            {
+                results.Add(new LinkCheckResult
+                {
+                    Icon = "✅",
+                    Title = "No Format Issues Detected",
+                    Description = "The URL format looks normal. Remember: this check only looks at the URL structure, not the actual website content or reputation.",
+                    Color = "#27AE60",
+                    Severity = "Safe"
+                });
+            }
+
+            return results;
         }
     }
 }

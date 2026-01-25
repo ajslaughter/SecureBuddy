@@ -1,0 +1,139 @@
+<Window x:Class="CyberShieldBuddy.WelcomeDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.modernwpf.com/2019"
+        Title="Welcome to CyberShield Buddy"
+        Height="500" Width="600"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        ui:WindowHelper.UseModernWindowStyle="True">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Background="{DynamicResource SystemControlBackgroundAccentBrush}" Padding="30">
+            <TextBlock Text="Welcome to CyberShield Buddy"
+                       FontSize="28" FontWeight="Bold"
+                       Foreground="White" HorizontalAlignment="Center"/>
+            <TextBlock Text="Your Personal Cybersecurity Coach"
+                       FontSize="14" Foreground="White"
+                       Opacity="0.9" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+        </StackPanel>
+
+        <!-- Step Content -->
+        <Grid Grid.Row="1" Margin="30">
+            <!-- Step 1: Run Scan -->
+            <StackPanel x:Name="Step1Panel" Visibility="Visible">
+                <TextBlock Text="Step 1 of 3" FontSize="12" Opacity="0.6" Margin="0,0,0,10"/>
+                <TextBlock Text="Run Your First Scan" FontSize="24" FontWeight="SemiBold" Margin="0,0,0,15"/>
+
+                <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                        CornerRadius="12" Padding="20" Margin="0,0,0,20">
+                    <StackPanel>
+                        <TextBlock Text="🔍" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,15"/>
+                        <TextBlock TextWrapping="Wrap" FontSize="14" TextAlignment="Center" LineHeight="22">
+                            CyberShield Buddy checks your Windows security settings to find potential vulnerabilities.
+                            <LineBreak/><LineBreak/>
+                            Click <Bold>Scan Now</Bold> on the main screen to see your current security score.
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="Don't worry - scanning is safe and doesn't change anything on your computer."
+                           FontSize="12" Opacity="0.6" TextWrapping="Wrap" FontStyle="Italic"/>
+            </StackPanel>
+
+            <!-- Step 2: Review Results -->
+            <StackPanel x:Name="Step2Panel" Visibility="Collapsed">
+                <TextBlock Text="Step 2 of 3" FontSize="12" Opacity="0.6" Margin="0,0,0,10"/>
+                <TextBlock Text="Review Your Results" FontSize="24" FontWeight="SemiBold" Margin="0,0,0,15"/>
+
+                <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                        CornerRadius="12" Padding="20" Margin="0,0,0,20">
+                    <StackPanel>
+                        <TextBlock Text="📋" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,15"/>
+                        <TextBlock TextWrapping="Wrap" FontSize="14" TextAlignment="Center" LineHeight="22">
+                            After scanning, you'll see a score from 0-100 and a list of security checks.
+                            <LineBreak/><LineBreak/>
+                            <Bold>Green</Bold> = You're protected
+                            <LineBreak/>
+                            <Bold>Orange</Bold> = Could be improved
+                            <LineBreak/>
+                            <Bold>Red</Bold> = Needs attention
+                            <LineBreak/><LineBreak/>
+                            Click any item to learn more about what it means.
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="Take your time to understand each item before making changes."
+                           FontSize="12" Opacity="0.6" TextWrapping="Wrap" FontStyle="Italic"/>
+            </StackPanel>
+
+            <!-- Step 3: Harden Now -->
+            <StackPanel x:Name="Step3Panel" Visibility="Collapsed">
+                <TextBlock Text="Step 3 of 3" FontSize="12" Opacity="0.6" Margin="0,0,0,10"/>
+                <TextBlock Text="Harden Your System" FontSize="24" FontWeight="SemiBold" Margin="0,0,0,15"/>
+
+                <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                        CornerRadius="12" Padding="20" Margin="0,0,0,20">
+                    <StackPanel>
+                        <TextBlock Text="🛡️" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,15"/>
+                        <TextBlock TextWrapping="Wrap" FontSize="14" TextAlignment="Center" LineHeight="22">
+                            Ready to improve your security? Click <Bold>Harden Now</Bold> to apply recommended settings.
+                            <LineBreak/><LineBreak/>
+                            This will:
+                            <LineBreak/>
+                            • Disable risky remote access features
+                            <LineBreak/>
+                            • Turn off vulnerable old protocols
+                            <LineBreak/>
+                            • Enable password protection features
+                            <LineBreak/><LineBreak/>
+                            <Italic>Administrator privileges required</Italic>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="You can always re-scan after hardening to verify the changes took effect."
+                           FontSize="12" Opacity="0.6" TextWrapping="Wrap" FontStyle="Italic"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Navigation -->
+        <Grid Grid.Row="2" Margin="30,0,30,30">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Step Indicators -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <Ellipse x:Name="Step1Dot" Width="10" Height="10" Fill="{DynamicResource SystemControlBackgroundAccentBrush}" Margin="0,0,8,0"/>
+                <Ellipse x:Name="Step2Dot" Width="10" Height="10" Fill="{DynamicResource SystemControlBackgroundBaseLowBrush}" Margin="0,0,8,0"/>
+                <Ellipse x:Name="Step3Dot" Width="10" Height="10" Fill="{DynamicResource SystemControlBackgroundBaseLowBrush}"/>
+            </StackPanel>
+
+            <!-- Skip Button -->
+            <Button x:Name="SkipButton" Grid.Column="1" Content="Skip Tutorial"
+                    HorizontalAlignment="Center" Click="SkipButton_Click"
+                    Background="Transparent" BorderThickness="0" Opacity="0.7"/>
+
+            <!-- Navigation Buttons -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <Button x:Name="BackButton" Content="Back" Width="80"
+                        Click="BackButton_Click" Margin="0,0,10,0" Visibility="Collapsed"/>
+                <Button x:Name="NextButton" Content="Next" Width="100"
+                        Click="NextButton_Click"
+                        Background="{DynamicResource SystemControlBackgroundAccentBrush}"
+                        Foreground="White" BorderThickness="0"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>
