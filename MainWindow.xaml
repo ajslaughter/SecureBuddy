@@ -5,9 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         mc:Ignorable="d"
-        Title="CyberShield Buddy" Height="800" Width="1000"
+        Title="CyberShield Buddy" Height="900" Width="1100"
         WindowStartupLocation="CenterScreen"
-        ui:WindowHelper.UseModernWindowStyle="True">
+        Background="{StaticResource SlateBackgroundBrush}"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        ui:TitleBar.Background="{StaticResource SlateBackgroundBrush}"
+        ui:TitleBar.Foreground="{StaticResource TextPrimaryBrush}">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -16,106 +19,275 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <StackPanel Grid.Row="0" Margin="0,20,0,20">
-            <TextBlock Text="CyberShield Buddy" Style="{StaticResource TitleTextBlockStyle}" 
-                       HorizontalAlignment="Center" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
-            <TextBlock Text="Your Personal Cybersecurity Coach" 
-                       HorizontalAlignment="Center" Style="{StaticResource SubtitleTextBlockStyle}" Opacity="0.6"/>
-        </StackPanel>
+        <Border Grid.Row="0" Background="{StaticResource SlateBackgroundBrush}" Padding="0,24,0,16">
+            <StackPanel HorizontalAlignment="Center">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
+                    <!-- Shield Icon using Segoe MDL2 Assets -->
+                    <TextBlock Text="&#xE83D;" FontFamily="Segoe MDL2 Assets" FontSize="36"
+                               Foreground="{StaticResource IndigoAccentBrush}" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                    <TextBlock Text="CyberShield Buddy" FontSize="32" FontWeight="Bold"
+                               Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                </StackPanel>
+                <TextBlock Text="Your Personal Cybersecurity Coach" FontSize="16"
+                           Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
 
-        <ScrollViewer Grid.Row="1" Padding="20">
-            <StackPanel MaxWidth="800" HorizontalAlignment="Center">
-                
+        <ScrollViewer Grid.Row="1" Padding="32,16,32,32" Background="{StaticResource SlateBackgroundBrush}">
+            <StackPanel MaxWidth="900" HorizontalAlignment="Center">
+
                 <!-- Health Monitor Section -->
-                <Border CornerRadius="12" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" Padding="30" Margin="0,0,0,20">
-                    <Border.Effect>
-                        <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
-                    </Border.Effect>
-                    <StackPanel>
-                        <TextBlock Text="System Health" Style="{StaticResource HeaderTextBlockStyle}" HorizontalAlignment="Center"/>
-                        
-                        <!-- Visual Score Indicator -->
-                        <Grid Margin="0,20">
-                            <Ellipse Width="150" Height="150" StrokeThickness="8" Stroke="{DynamicResource SystemControlBackgroundBaseLowBrush}"/>
-                            <Ellipse x:Name="HealthStatusRing" Width="150" Height="150" StrokeThickness="8" Stroke="Gray"/>
-                            
+                <Border Style="{StaticResource DarkCardStyle}" Margin="0,0,0,24">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Circular Progress Ring -->
+                        <Grid Grid.Column="0" Margin="0,0,40,0" Width="180" Height="180">
+                            <!-- Background Ring -->
+                            <Ellipse Width="180" Height="180" StrokeThickness="12"
+                                     Stroke="{StaticResource ProgressRingBackgroundBrush}" Fill="Transparent"/>
+
+                            <!-- Progress Ring (Arc) -->
+                            <Canvas Width="180" Height="180">
+                                <Path x:Name="ProgressArc" StrokeThickness="12" StrokeStartLineCap="Round" StrokeEndLineCap="Round">
+                                    <Path.Stroke>
+                                        <SolidColorBrush x:Name="ProgressArcBrush" Color="{StaticResource TextMuted}"/>
+                                    </Path.Stroke>
+                                    <Path.Data>
+                                        <PathGeometry>
+                                            <PathFigure x:Name="ProgressFigure" StartPoint="90,6">
+                                                <ArcSegment x:Name="ProgressArcSegment"
+                                                            Size="84,84"
+                                                            SweepDirection="Clockwise"
+                                                            IsLargeArc="False"
+                                                            Point="90,6"/>
+                                            </PathFigure>
+                                        </PathGeometry>
+                                    </Path.Data>
+                                </Path>
+                            </Canvas>
+
+                            <!-- Score Display -->
                             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <TextBlock x:Name="ScoreText" Text="?" FontSize="48" FontWeight="Bold" HorizontalAlignment="Center"/>
-                                <TextBlock x:Name="StatusText" Text="Unknown" HorizontalAlignment="Center" Opacity="0.7"/>
+                                <TextBlock x:Name="ScoreText" Text="?" FontSize="56" FontWeight="Bold"
+                                           Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                <TextBlock x:Name="StatusText" Text="Tap Scan" FontSize="14"
+                                           Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Grid>
 
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
-                            <Button x:Name="ScanButton" Content="Scan Now" Width="180" Height="50" 
-                                    Click="ScanButton_Click" FontSize="18" Margin="0,0,10,0"/>
-                            <Button x:Name="HardenButton" Content="Harden Now" Width="180" Height="50" 
-                                    Click="HardenButton_Click" FontSize="18" 
-                                    Background="#27AE60" Foreground="White" BorderThickness="0"/>
+                        <!-- Health Info and Actions -->
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                <TextBlock Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" FontSize="24"
+                                           Foreground="{StaticResource IndigoAccentBrush}" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                <TextBlock Text="System Health" FontSize="24" FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <TextBlock Text="Analyze your system's security posture and apply hardening measures."
+                                       FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"
+                                       TextWrapping="Wrap" Margin="0,0,0,20" MaxWidth="400"/>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                <Button x:Name="ScanButton" Style="{StaticResource AccentButtonStyle}"
+                                        Width="160" Height="48" Click="ScanButton_Click" Margin="0,0,12,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE9D9;" FontFamily="Segoe MDL2 Assets" FontSize="16"
+                                                   VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                        <TextBlock Text="Scan Now" FontSize="16" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button x:Name="HardenButton" Style="{StaticResource SafeButtonStyle}"
+                                        Width="160" Height="48" Click="HardenButton_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE9D5;" FontFamily="Segoe MDL2 Assets" FontSize="16"
+                                                   VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                        <TextBlock Text="Harden Now" FontSize="16" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+
+                            <!-- Issues List -->
+                            <ItemsControl x:Name="IssuesList" MaxHeight="120">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#2a1f3d" CornerRadius="8" Padding="12,8" Margin="0,0,0,6">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                                           Foreground="{StaticResource RoseDangerBrush}"
+                                                           VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                                <TextBlock Text="{Binding}" Foreground="{StaticResource RoseDangerBrush}"
+                                                           FontSize="13" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </StackPanel>
-                                
-                        <ItemsControl x:Name="IssuesList" Margin="0,20,0,0">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding}" Foreground="#E74C3C" HorizontalAlignment="Center" Margin="0,2"/>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </StackPanel>
+                    </Grid>
                 </Border>
 
                 <!-- Tools Grid -->
-                <Grid>
+                <Grid Margin="0,0,0,24">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="24"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Phishing Buster -->
-                    <Border Grid.Column="0" CornerRadius="12" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" Padding="20">
-                         <Border.Effect>
-                            <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
-                        </Border.Effect>
+                    <!-- Link Checker -->
+                    <Border Grid.Column="0" Style="{StaticResource DarkCardStyle}">
                         <StackPanel>
-                            <TextBlock Text="🔗 Link Checker" Style="{StaticResource SubheaderTextBlockStyle}" Margin="0,0,0,10"/>
-                            <TextBlock Text="Paste a link to check for phishing red flags." Opacity="0.6" TextWrapping="Wrap" Margin="0,0,0,10"/>
-                            <TextBox x:Name="UrlInput" ui:ControlHelper.PlaceholderText="https://example.com" Margin="0,0,0,10"/>
-                            <Button Content="Check Link" HorizontalAlignment="Stretch" Click="CheckLink_Click" Margin="0,0,0,10"/>
-                            <TextBlock x:Name="PhishingResult" TextWrapping="Wrap" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" FontWeight="SemiBold"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <Border Background="{StaticResource IndigoAccentBrush}" CornerRadius="10"
+                                        Width="44" Height="44" Margin="0,0,14,0">
+                                    <TextBlock Text="&#xE71B;" FontFamily="Segoe MDL2 Assets" FontSize="20"
+                                               Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="Link Checker" FontSize="18" FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                                    <TextBlock Text="Detect phishing attempts" FontSize="12"
+                                               Foreground="{StaticResource TextMutedBrush}"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <TextBlock Text="Paste a URL to analyze it for potential phishing red flags and security risks."
+                                       FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"
+                                       TextWrapping="Wrap" Margin="0,0,0,16"/>
+
+                            <TextBox x:Name="UrlInput" ui:ControlHelper.PlaceholderText="https://example.com"
+                                     FontSize="14" Margin="0,0,0,12"/>
+
+                            <Button Content="Check Link" Style="{StaticResource AccentButtonStyle}"
+                                    HorizontalAlignment="Stretch" Height="40" Click="CheckLink_Click" Margin="0,0,0,12"/>
+
+                            <Border x:Name="PhishingResultBorder" CornerRadius="10" Padding="14"
+                                    Background="#1a2744" Visibility="Collapsed">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock x:Name="PhishingResultIcon" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                               VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <TextBlock x:Name="PhishingResult" TextWrapping="Wrap" FontSize="13"
+                                               Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
                     </Border>
 
                     <!-- Fix My Screen -->
-                    <Border Grid.Column="2" CornerRadius="12" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" Padding="20">
-                         <Border.Effect>
-                            <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
-                        </Border.Effect>
+                    <Border Grid.Column="2" Style="{StaticResource DarkCardStyle}">
                         <StackPanel>
-                            <TextBlock Text="Fix My Screen" Style="{StaticResource SubheaderTextBlockStyle}" Margin="0,0,0,10"/>
-                            <TextBlock Text="Screen glitching or multi-monitor issues?" Opacity="0.6" TextWrapping="Wrap" Margin="0,0,0,10"/>
-                            <Button Content="Fix Resolution" HorizontalAlignment="Stretch" Click="FixScreen_Click" Background="#E74C3C" Foreground="White" BorderThickness="0"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <Border Background="{StaticResource RoseDangerBrush}" CornerRadius="10"
+                                        Width="44" Height="44" Margin="0,0,14,0">
+                                    <TextBlock Text="&#xE7F4;" FontFamily="Segoe MDL2 Assets" FontSize="20"
+                                               Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="Fix My Screen" FontSize="18" FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                                    <TextBlock Text="Display troubleshooter" FontSize="12"
+                                               Foreground="{StaticResource TextMutedBrush}"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <TextBlock Text="Experiencing screen glitches, multi-monitor problems, or resolution issues? This tool will reset your display drivers."
+                                       FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"
+                                       TextWrapping="Wrap" Margin="0,0,0,16"/>
+
+                            <Button Style="{StaticResource DangerButtonStyle}"
+                                    HorizontalAlignment="Stretch" Height="40" Click="FixScreen_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE72C;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                               VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Text="Fix Resolution" FontSize="14" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+
+                            <Border Background="#1a2744" CornerRadius="10" Padding="14" Margin="0,16,0,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="16"
+                                               Foreground="{StaticResource AmberWarningBrush}"
+                                               VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Requires administrator privileges" FontSize="12"
+                                               Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
                     </Border>
                 </Grid>
 
                 <!-- Network Guardian -->
-                <Border CornerRadius="12" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" Padding="20" Margin="0,20,0,0">
-                     <Border.Effect>
-                        <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.1"/>
-                    </Border.Effect>
+                <Border Style="{StaticResource DarkCardStyle}">
                     <StackPanel>
-                        <TextBlock Text="Network Guardian" Style="{StaticResource SubheaderTextBlockStyle}" Margin="0,0,0,10"/>
-                        <TextBlock Text="Active connections on your device." Opacity="0.6" Margin="0,0,0,10"/>
-                        <Button Content="Refresh Map" Click="RefreshNetwork_Click" HorizontalAlignment="Left" Margin="0,0,0,10"/>
-                        <ListView x:Name="NetworkList" Height="150" ScrollViewer.VerticalScrollBarVisibility="Auto">
-                            <ListView.View>
-                                <GridView>
-                                    <GridViewColumn Header="App" DisplayMemberBinding="{Binding ProcessName}" Width="150"/>
-                                    <GridViewColumn Header="Remote Address" DisplayMemberBinding="{Binding RemoteAddress}" Width="150"/>
-                                    <GridViewColumn Header="State" DisplayMemberBinding="{Binding State}" Width="100"/>
-                                </GridView>
-                            </ListView.View>
-                        </ListView>
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Orientation="Horizontal" Grid.Column="0">
+                                <Border Background="{StaticResource EmeraldSafeBrush}" CornerRadius="10"
+                                        Width="44" Height="44" Margin="0,0,14,0">
+                                    <TextBlock Text="&#xE968;" FontFamily="Segoe MDL2 Assets" FontSize="20"
+                                               Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="Network Guardian" FontSize="18" FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                                    <TextBlock Text="Monitor active connections" FontSize="12"
+                                               Foreground="{StaticResource TextMutedBrush}"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <Button Grid.Column="1" Style="{StaticResource AccentButtonStyle}"
+                                    Height="40" Click="RefreshNetwork_Click" Padding="16,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE72C;" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                               VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Text="Refresh" FontSize="14" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+
+                        <TextBlock Text="View all active network connections on your device to detect suspicious activity."
+                                   FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"
+                                   TextWrapping="Wrap" Margin="0,0,0,16"/>
+
+                        <Border Background="#0f172a" CornerRadius="12" Padding="4">
+                            <ListView x:Name="NetworkList" Height="180"
+                                      Background="Transparent" BorderThickness="0"
+                                      ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                <ListView.Resources>
+                                    <Style TargetType="GridViewColumnHeader">
+                                        <Setter Property="Background" Value="#1e293b"/>
+                                        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                                        <Setter Property="Padding" Value="12,10"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                        <Setter Property="FontSize" Value="12"/>
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                    </Style>
+                                </ListView.Resources>
+                                <ListView.View>
+                                    <GridView>
+                                        <GridViewColumn Header="APPLICATION" DisplayMemberBinding="{Binding ProcessName}" Width="200"/>
+                                        <GridViewColumn Header="REMOTE ADDRESS" DisplayMemberBinding="{Binding RemoteAddress}" Width="280"/>
+                                        <GridViewColumn Header="STATE" DisplayMemberBinding="{Binding State}" Width="120"/>
+                                    </GridView>
+                                </ListView.View>
+                            </ListView>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Footer -->
+                <Border Margin="0,24,0,0" Padding="16">
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="Powered by CyberShield Engine" FontSize="12"
+                                   Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Border>
 
