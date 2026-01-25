@@ -107,9 +107,10 @@ namespace CyberShieldBuddy
                     AuditLogger.Log($"Scan complete: Score {score} - Action Required", "WARN");
                 }
 
-                // List issues
-                var issues = SecurityEngine.AuditFieldCompliance();
-                IssuesList.ItemsSource = issues;
+                // Populate security status cards
+                var securityChecks = SecurityEngine.GetAllSecurityChecks();
+                SecurityChecksList.ItemsSource = securityChecks;
+                SecurityCardsSection.Visibility = Visibility.Visible;
             }
             catch (Exception ex)
             {
@@ -218,6 +219,16 @@ namespace CyberShieldBuddy
                 PhishingResultIcon.Text = "\uE73E"; // Checkmark icon
                 PhishingResultIcon.Foreground = new SolidColorBrush(EmeraldSafe);
                 AuditLogger.Log($"No red flags found in URL: {url}", "INFO");
+            }
+        }
+
+        private void SecurityCard_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            // The card details are already visible in the template
+            // This handler can be extended for additional interactions if needed
+            if (sender is FrameworkElement element && element.DataContext is SecurityCheckResult check)
+            {
+                AuditLogger.Log($"Security card clicked: {check.Title} - Status: {check.Status}", "INFO");
             }
         }
 
