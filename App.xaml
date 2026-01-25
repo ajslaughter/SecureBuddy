@@ -6,9 +6,83 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ui:ThemeResources />
+                <ui:ThemeResources RequestedTheme="Dark" />
                 <ui:XamlControlsResources />
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- Dark Theme Color Palette -->
+            <!-- Background Colors (Slate) -->
+            <Color x:Key="SlateBackground">#0f172a</Color>
+            <Color x:Key="SlateCard">#1e293b</Color>
+            <Color x:Key="SlateCardHover">#334155</Color>
+            <Color x:Key="SlateBorder">#475569</Color>
+
+            <!-- Accent Color (Indigo) -->
+            <Color x:Key="IndigoAccent">#6366f1</Color>
+            <Color x:Key="IndigoAccentHover">#818cf8</Color>
+
+            <!-- Status Colors -->
+            <Color x:Key="EmeraldSafe">#10b981</Color>
+            <Color x:Key="AmberWarning">#f59e0b</Color>
+            <Color x:Key="RoseDanger">#f43f5e</Color>
+
+            <!-- Text Colors -->
+            <Color x:Key="TextPrimary">#f8fafc</Color>
+            <Color x:Key="TextSecondary">#94a3b8</Color>
+            <Color x:Key="TextMuted">#64748b</Color>
+
+            <!-- SolidColorBrushes for use in XAML -->
+            <SolidColorBrush x:Key="SlateBackgroundBrush" Color="{StaticResource SlateBackground}" />
+            <SolidColorBrush x:Key="SlateCardBrush" Color="{StaticResource SlateCard}" />
+            <SolidColorBrush x:Key="SlateCardHoverBrush" Color="{StaticResource SlateCardHover}" />
+            <SolidColorBrush x:Key="SlateBorderBrush" Color="{StaticResource SlateBorder}" />
+            <SolidColorBrush x:Key="IndigoAccentBrush" Color="{StaticResource IndigoAccent}" />
+            <SolidColorBrush x:Key="IndigoAccentHoverBrush" Color="{StaticResource IndigoAccentHover}" />
+            <SolidColorBrush x:Key="EmeraldSafeBrush" Color="{StaticResource EmeraldSafe}" />
+            <SolidColorBrush x:Key="AmberWarningBrush" Color="{StaticResource AmberWarning}" />
+            <SolidColorBrush x:Key="RoseDangerBrush" Color="{StaticResource RoseDanger}" />
+            <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimary}" />
+            <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondary}" />
+            <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource TextMuted}" />
+
+            <!-- Progress Ring Background -->
+            <SolidColorBrush x:Key="ProgressRingBackgroundBrush" Color="#334155" />
+
+            <!-- Card Style -->
+            <Style x:Key="DarkCardStyle" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource SlateCardBrush}" />
+                <Setter Property="CornerRadius" Value="16" />
+                <Setter Property="Padding" Value="24" />
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect BlurRadius="20" ShadowDepth="4" Opacity="0.3" Color="#000000" />
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Primary Button Style (Indigo Accent) -->
+            <Style x:Key="AccentButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                <Setter Property="Background" Value="{StaticResource IndigoAccentBrush}" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+            </Style>
+
+            <!-- Safe Button Style (Emerald) -->
+            <Style x:Key="SafeButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                <Setter Property="Background" Value="{StaticResource EmeraldSafeBrush}" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+            </Style>
+
+            <!-- Danger Button Style (Rose) -->
+            <Style x:Key="DangerButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                <Setter Property="Background" Value="{StaticResource RoseDangerBrush}" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
