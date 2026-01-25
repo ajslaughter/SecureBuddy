@@ -10,6 +10,32 @@ using System.Linq;
 
 namespace CyberShieldBuddy
 {
+    public enum SecurityStatus
+    {
+        Safe,
+        Warning,
+        Unsafe
+    }
+
+    public class SecurityCheckResult
+    {
+        public string Key { get; set; } = "";
+        public string Title { get; set; } = "";
+        public string Description { get; set; } = "";
+        public string SafeMessage { get; set; } = "";
+        public string UnsafeMessage { get; set; } = "";
+        public string Tip { get; set; } = "";
+        public SecurityStatus Status { get; set; }
+        public string Icon { get; set; } = "\uE83D"; // Shield icon default
+
+        public string StatusText => Status == SecurityStatus.Safe ? "Protected" :
+                                    Status == SecurityStatus.Warning ? "Review needed" : "Action needed";
+        public string StatusIcon => Status == SecurityStatus.Safe ? "\uE73E" : // Checkmark
+                                    Status == SecurityStatus.Warning ? "\uE7BA" : // Warning
+                                    "\uE711"; // X mark
+        public string CurrentMessage => Status == SecurityStatus.Safe ? SafeMessage : UnsafeMessage;
+    }
+
     public static class SecurityEngine
     {
         // --- Registry Path Constants ---
@@ -271,6 +297,85 @@ namespace CyberShieldBuddy
             if (CheckCredentialGuard()) score++;
 
             return (int)((double)score / totalChecks * 100);
+        }
+
+        public static List<SecurityCheckResult> GetAllSecurityChecks()
+        {
+            var results = new List<SecurityCheckResult>();
+
+            // RDP Check
+            results.Add(new SecurityCheckResult
+            {
+                Key = "rdp",
+                Title = "Remote Desktop",
+                Icon = "\uE7F4", // Monitor icon
+                SafeMessage = "Remote access is blocked - hackers can't connect to your PC remotely.",
+                UnsafeMessage = "Remote access is enabled - someone could potentially access your PC from the internet.",
+                Tip = "Unless you specifically need to connect from another computer, keep this disabled.",
+                Status = CheckRDPStatus() ? SecurityStatus.Safe : SecurityStatus.Unsafe
+            });
+
+            // SMBv1 Check
+            results.Add(new SecurityCheckResult
+            {
+                Key = "smb",
+                Title = "Old File Sharing (SMBv1)",
+                Icon = "\uE8B7", // Link icon
+                SafeMessage = "Outdated file sharing (SMBv1) is disabled - protected against ransomware attacks.",
+                UnsafeMessage = "Outdated file sharing is enabled - vulnerable to WannaCry-style attacks.",
+                Tip = "SMBv1 is from 1983. Modern file sharing works without it.",
+                Status = CheckSMBv1() ? SecurityStatus.Safe : SecurityStatus.Unsafe
+            });
+
+            // Guest Account Check
+            results.Add(new SecurityCheckResult
+            {
+                Key = "guest",
+                Title = "Guest Account",
+                Icon = "\uE77B", // Contact icon
+                SafeMessage = "Guest account is disabled - no anonymous access to your PC.",
+                UnsafeMessage = "Guest account is active - anyone could use your PC without a password.",
+                Tip = "The Guest account lets people use your PC without logging in.",
+                Status = CheckGuestAccount() ? SecurityStatus.Safe : SecurityStatus.Unsafe
+            });
+
+            // LSA Protection Check
+            results.Add(new SecurityCheckResult
+            {
+                Key = "lsa",
+                Title = "Password Protection",
+                Icon = "\uE83D", // Shield icon
+                SafeMessage = "Your passwords are protected with extra security.",
+                UnsafeMessage = "Your saved passwords could be more vulnerable to theft.",
+                Tip = "LSA Protection keeps your Windows passwords safe from hackers.",
+                Status = CheckLSAProtection() ? SecurityStatus.Safe : SecurityStatus.Warning
+            });
+
+            // Auto Logon Check
+            results.Add(new SecurityCheckResult
+            {
+                Key = "autologon",
+                Title = "Auto Login",
+                Icon = "\uE72E", // Unlock icon
+                SafeMessage = "You must enter your password to log in - good!",
+                UnsafeMessage = "Your PC logs in automatically - anyone who turns it on gets full access.",
+                Tip = "Auto-login is convenient but risky if your computer is ever stolen.",
+                Status = CheckAutoLogon() ? SecurityStatus.Safe : SecurityStatus.Unsafe
+            });
+
+            // Credential Guard Check
+            results.Add(new SecurityCheckResult
+            {
+                Key = "credential",
+                Title = "Credential Guard",
+                Icon = "\uE8D7", // Certificate icon
+                SafeMessage = "Advanced password protection is active.",
+                UnsafeMessage = "Advanced protection is available but not enabled.",
+                Tip = "This is enterprise-grade security. Nice to have but not required for home use.",
+                Status = CheckCredentialGuard() ? SecurityStatus.Safe : SecurityStatus.Warning
+            });
+
+            return results;
         }
 
         public static List<string> AuditFieldCompliance()

@@ -110,24 +110,183 @@
                                 </Button>
                             </StackPanel>
 
-                            <!-- Issues List -->
-                            <ItemsControl x:Name="IssuesList" MaxHeight="120">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Background="#2a1f3d" CornerRadius="8" Padding="12,8" Margin="0,0,0,6">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="14"
-                                                           Foreground="{StaticResource RoseDangerBrush}"
-                                                           VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                                <TextBlock Text="{Binding}" Foreground="{StaticResource RoseDangerBrush}"
-                                                           FontSize="13" VerticalAlignment="Center"/>
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
                         </StackPanel>
                     </Grid>
+                </Border>
+
+                <!-- Security Status Cards -->
+                <Border Style="{StaticResource DarkCardStyle}" Margin="0,0,0,24" x:Name="SecurityCardsSection" Visibility="Collapsed">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                            <TextBlock Text="&#xE83D;" FontFamily="Segoe MDL2 Assets" FontSize="24"
+                                       Foreground="{StaticResource IndigoAccentBrush}" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="Security Settings" FontSize="20" FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextPrimaryBrush}"/>
+                                <TextBlock Text="Click each card to learn more" FontSize="12"
+                                           Foreground="{StaticResource TextMutedBrush}"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <ItemsControl x:Name="SecurityChecksList">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Columns="2" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="6" CornerRadius="12" Padding="16" Cursor="Hand"
+                                            MouseLeftButtonUp="SecurityCard_Click">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background">
+                                                    <Setter.Value>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                            <GradientStop Color="#1a3a2a" Offset="0"/>
+                                                            <GradientStop Color="#0f2a1a" Offset="1"/>
+                                                        </LinearGradientBrush>
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Setter Property="BorderBrush" Value="#2a5a3a"/>
+                                                <Setter Property="BorderThickness" Value="1"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Warning">
+                                                        <Setter Property="Background">
+                                                            <Setter.Value>
+                                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                    <GradientStop Color="#3a3a1a" Offset="0"/>
+                                                                    <GradientStop Color="#2a2a0f" Offset="1"/>
+                                                                </LinearGradientBrush>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                        <Setter Property="BorderBrush" Value="#5a5a2a"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Unsafe">
+                                                        <Setter Property="Background">
+                                                            <Setter.Value>
+                                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                    <GradientStop Color="#3a1a2a" Offset="0"/>
+                                                                    <GradientStop Color="#2a0f1a" Offset="1"/>
+                                                                </LinearGradientBrush>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                        <Setter Property="BorderBrush" Value="#5a2a3a"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <!-- Header Row -->
+                                            <Grid Grid.Row="0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Icon -->
+                                                <Border Grid.Column="0" Background="#1e293b" CornerRadius="10"
+                                                        Width="40" Height="40" Margin="0,0,12,0">
+                                                    <TextBlock Text="{Binding Icon}" FontFamily="Segoe MDL2 Assets" FontSize="18"
+                                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+
+                                                <!-- Title and Status Text -->
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold"
+                                                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                                        <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="11"
+                                                                   VerticalAlignment="Center" Margin="0,0,4,0">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Text" Value="&#xE73E;"/>
+                                                                    <Setter Property="Foreground" Value="{StaticResource EmeraldSafeBrush}"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding Status}" Value="Warning">
+                                                                            <Setter Property="Text" Value="&#xE7BA;"/>
+                                                                            <Setter Property="Foreground" Value="{StaticResource AmberWarningBrush}"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding Status}" Value="Unsafe">
+                                                                            <Setter Property="Text" Value="&#xE711;"/>
+                                                                            <Setter Property="Foreground" Value="{StaticResource RoseDangerBrush}"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                        <TextBlock Text="{Binding StatusText}" FontSize="11">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Foreground" Value="{StaticResource EmeraldSafeBrush}"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding Status}" Value="Warning">
+                                                                            <Setter Property="Foreground" Value="{StaticResource AmberWarningBrush}"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding Status}" Value="Unsafe">
+                                                                            <Setter Property="Foreground" Value="{StaticResource RoseDangerBrush}"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                </StackPanel>
+
+                                                <!-- Status Icon (Right Side) -->
+                                                <TextBlock Grid.Column="2" FontFamily="Segoe MDL2 Assets" FontSize="20"
+                                                           VerticalAlignment="Center" HorizontalAlignment="Right">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Text" Value="&#xE73E;"/>
+                                                            <Setter Property="Foreground" Value="{StaticResource EmeraldSafeBrush}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Status}" Value="Warning">
+                                                                    <Setter Property="Text" Value="&#xE7BA;"/>
+                                                                    <Setter Property="Foreground" Value="{StaticResource AmberWarningBrush}"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Status}" Value="Unsafe">
+                                                                    <Setter Property="Text" Value="&#xE711;"/>
+                                                                    <Setter Property="Foreground" Value="{StaticResource RoseDangerBrush}"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </Grid>
+
+                                            <!-- Expandable Details (shown via tooltip for now) -->
+                                            <Border Grid.Row="1" Margin="0,12,0,0" Padding="12" CornerRadius="8"
+                                                    Background="#0f172a" BorderBrush="#1e293b" BorderThickness="1">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding CurrentMessage}" FontSize="12"
+                                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                                               TextWrapping="Wrap"/>
+                                                    <Border Background="#1e293b" CornerRadius="6" Padding="10" Margin="0,10,0,0">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                                                       Foreground="{StaticResource IndigoAccentBrush}"
+                                                                       VerticalAlignment="Top" Margin="0,1,8,0"/>
+                                                            <TextBlock Text="{Binding Tip}" FontSize="11"
+                                                                       Foreground="{StaticResource TextMutedBrush}"
+                                                                       TextWrapping="Wrap"/>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </StackPanel>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
                 </Border>
 
                 <!-- Tools Grid -->
