@@ -10,79 +10,276 @@
                 <ui:XamlControlsResources />
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- Dark Theme Color Palette -->
-            <!-- Background Colors (Slate) -->
-            <Color x:Key="SlateBackground">#0f172a</Color>
-            <Color x:Key="SlateCard">#1e293b</Color>
-            <Color x:Key="SlateCardHover">#334155</Color>
-            <Color x:Key="SlateBorder">#475569</Color>
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <!-- CYBER-NOIR PREMIUM THEME - Command Center Edition               -->
+            <!-- ═══════════════════════════════════════════════════════════════ -->
 
-            <!-- Accent Color (Indigo) -->
-            <Color x:Key="IndigoAccent">#6366f1</Color>
-            <Color x:Key="IndigoAccentHover">#818cf8</Color>
+            <!-- Primary Background Colors (Void Black Series) -->
+            <Color x:Key="VoidBlack">#030712</Color>
+            <Color x:Key="DeepSpace">#0a0f1a</Color>
+            <Color x:Key="NightSurface">#111827</Color>
+            <Color x:Key="DarkPanel">#1f2937</Color>
 
-            <!-- Status Colors -->
-            <Color x:Key="EmeraldSafe">#10b981</Color>
-            <Color x:Key="AmberWarning">#f59e0b</Color>
-            <Color x:Key="RoseDanger">#f43f5e</Color>
+            <!-- Cyan Accent (Primary Brand Color) -->
+            <Color x:Key="CyanPrimary">#06b6d4</Color>
+            <Color x:Key="CyanGlow">#22d3ee</Color>
+            <Color x:Key="CyanMuted">#0891b2</Color>
+            <Color x:Key="CyanDark">#164e63</Color>
 
-            <!-- Text Colors -->
-            <Color x:Key="TextPrimary">#f8fafc</Color>
-            <Color x:Key="TextSecondary">#94a3b8</Color>
-            <Color x:Key="TextMuted">#64748b</Color>
+            <!-- Neon Accent Colors -->
+            <Color x:Key="NeonPurple">#a855f7</Color>
+            <Color x:Key="NeonPink">#ec4899</Color>
+            <Color x:Key="NeonBlue">#3b82f6</Color>
 
-            <!-- SolidColorBrushes for use in XAML -->
-            <SolidColorBrush x:Key="SlateBackgroundBrush" Color="{StaticResource SlateBackground}" />
-            <SolidColorBrush x:Key="SlateCardBrush" Color="{StaticResource SlateCard}" />
-            <SolidColorBrush x:Key="SlateCardHoverBrush" Color="{StaticResource SlateCardHover}" />
-            <SolidColorBrush x:Key="SlateBorderBrush" Color="{StaticResource SlateBorder}" />
-            <SolidColorBrush x:Key="IndigoAccentBrush" Color="{StaticResource IndigoAccent}" />
-            <SolidColorBrush x:Key="IndigoAccentHoverBrush" Color="{StaticResource IndigoAccentHover}" />
-            <SolidColorBrush x:Key="EmeraldSafeBrush" Color="{StaticResource EmeraldSafe}" />
-            <SolidColorBrush x:Key="AmberWarningBrush" Color="{StaticResource AmberWarning}" />
-            <SolidColorBrush x:Key="RoseDangerBrush" Color="{StaticResource RoseDanger}" />
+            <!-- Status Colors (Vivid for dark background) -->
+            <Color x:Key="StatusSafe">#10b981</Color>
+            <Color x:Key="StatusSafeGlow">#34d399</Color>
+            <Color x:Key="StatusWarning">#f59e0b</Color>
+            <Color x:Key="StatusWarningGlow">#fbbf24</Color>
+            <Color x:Key="StatusDanger">#ef4444</Color>
+            <Color x:Key="StatusDangerGlow">#f87171</Color>
+
+            <!-- Text Hierarchy -->
+            <Color x:Key="TextBright">#f9fafb</Color>
+            <Color x:Key="TextPrimary">#e5e7eb</Color>
+            <Color x:Key="TextSecondary">#9ca3af</Color>
+            <Color x:Key="TextMuted">#6b7280</Color>
+            <Color x:Key="TextDim">#4b5563</Color>
+
+            <!-- Glassmorphism Colors -->
+            <Color x:Key="GlassWhite">#0Dffffff</Color>
+            <Color x:Key="GlassBorder">#1Affffff</Color>
+            <Color x:Key="GlassHighlight">#33ffffff</Color>
+
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <!-- SOLID COLOR BRUSHES                                              -->
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+
+            <!-- Background Brushes -->
+            <SolidColorBrush x:Key="VoidBlackBrush" Color="{StaticResource VoidBlack}" />
+            <SolidColorBrush x:Key="DeepSpaceBrush" Color="{StaticResource DeepSpace}" />
+            <SolidColorBrush x:Key="NightSurfaceBrush" Color="{StaticResource NightSurface}" />
+            <SolidColorBrush x:Key="DarkPanelBrush" Color="{StaticResource DarkPanel}" />
+
+            <!-- Cyan Brushes -->
+            <SolidColorBrush x:Key="CyanPrimaryBrush" Color="{StaticResource CyanPrimary}" />
+            <SolidColorBrush x:Key="CyanGlowBrush" Color="{StaticResource CyanGlow}" />
+            <SolidColorBrush x:Key="CyanMutedBrush" Color="{StaticResource CyanMuted}" />
+            <SolidColorBrush x:Key="CyanDarkBrush" Color="{StaticResource CyanDark}" />
+
+            <!-- Neon Brushes -->
+            <SolidColorBrush x:Key="NeonPurpleBrush" Color="{StaticResource NeonPurple}" />
+            <SolidColorBrush x:Key="NeonPinkBrush" Color="{StaticResource NeonPink}" />
+            <SolidColorBrush x:Key="NeonBlueBrush" Color="{StaticResource NeonBlue}" />
+
+            <!-- Status Brushes -->
+            <SolidColorBrush x:Key="StatusSafeBrush" Color="{StaticResource StatusSafe}" />
+            <SolidColorBrush x:Key="StatusSafeGlowBrush" Color="{StaticResource StatusSafeGlow}" />
+            <SolidColorBrush x:Key="StatusWarningBrush" Color="{StaticResource StatusWarning}" />
+            <SolidColorBrush x:Key="StatusWarningGlowBrush" Color="{StaticResource StatusWarningGlow}" />
+            <SolidColorBrush x:Key="StatusDangerBrush" Color="{StaticResource StatusDanger}" />
+            <SolidColorBrush x:Key="StatusDangerGlowBrush" Color="{StaticResource StatusDangerGlow}" />
+
+            <!-- Text Brushes -->
+            <SolidColorBrush x:Key="TextBrightBrush" Color="{StaticResource TextBright}" />
             <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimary}" />
             <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondary}" />
             <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource TextMuted}" />
+            <SolidColorBrush x:Key="TextDimBrush" Color="{StaticResource TextDim}" />
+
+            <!-- Glass Brushes -->
+            <SolidColorBrush x:Key="GlassWhiteBrush" Color="{StaticResource GlassWhite}" />
+            <SolidColorBrush x:Key="GlassBorderBrush" Color="{StaticResource GlassBorder}" />
+            <SolidColorBrush x:Key="GlassHighlightBrush" Color="{StaticResource GlassHighlight}" />
 
             <!-- Progress Ring Background -->
-            <SolidColorBrush x:Key="ProgressRingBackgroundBrush" Color="#334155" />
+            <SolidColorBrush x:Key="ProgressRingBackgroundBrush" Color="#1f2937" />
 
-            <!-- Card Style -->
-            <Style x:Key="DarkCardStyle" TargetType="Border">
-                <Setter Property="Background" Value="{StaticResource SlateCardBrush}" />
-                <Setter Property="CornerRadius" Value="16" />
-                <Setter Property="Padding" Value="24" />
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <!-- GRADIENT BRUSHES                                                 -->
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+
+            <!-- Cyber Gradient (Primary brand gradient) -->
+            <LinearGradientBrush x:Key="CyberGradient" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="{StaticResource CyanPrimary}" Offset="0"/>
+                <GradientStop Color="{StaticResource NeonPurple}" Offset="1"/>
+            </LinearGradientBrush>
+
+            <!-- Void Gradient (Deep background) -->
+            <LinearGradientBrush x:Key="VoidGradient" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="{StaticResource VoidBlack}" Offset="0"/>
+                <GradientStop Color="{StaticResource DeepSpace}" Offset="1"/>
+            </LinearGradientBrush>
+
+            <!-- Panel Gradient (Card backgrounds) -->
+            <LinearGradientBrush x:Key="PanelGradient" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#0d1117" Offset="0"/>
+                <GradientStop Color="#161b22" Offset="1"/>
+            </LinearGradientBrush>
+
+            <!-- Glassmorphism Gradient -->
+            <LinearGradientBrush x:Key="GlassGradient" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#15ffffff" Offset="0"/>
+                <GradientStop Color="#05ffffff" Offset="1"/>
+            </LinearGradientBrush>
+
+            <!-- Radial Glow for accents -->
+            <RadialGradientBrush x:Key="CyanRadialGlow" Center="0.5,0.5" RadiusX="0.5" RadiusY="0.5">
+                <GradientStop Color="#4006b6d4" Offset="0"/>
+                <GradientStop Color="#0006b6d4" Offset="1"/>
+            </RadialGradientBrush>
+
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <!-- GLASSMORPHISM CARD STYLE                                         -->
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+
+            <Style x:Key="GlassCardStyle" TargetType="Border">
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#12ffffff" Offset="0"/>
+                            <GradientStop Color="#08ffffff" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="BorderBrush">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#25ffffff" Offset="0"/>
+                            <GradientStop Color="#10ffffff" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="16"/>
+                <Setter Property="Padding" Value="24"/>
                 <Setter Property="Effect">
                     <Setter.Value>
-                        <DropShadowEffect BlurRadius="20" ShadowDepth="4" Opacity="0.3" Color="#000000" />
+                        <DropShadowEffect BlurRadius="40" ShadowDepth="0" Opacity="0.3" Color="#000000"/>
                     </Setter.Value>
                 </Setter>
             </Style>
 
-            <!-- Primary Button Style (Indigo Accent) -->
-            <Style x:Key="AccentButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
-                <Setter Property="Background" Value="{StaticResource IndigoAccentBrush}" />
-                <Setter Property="Foreground" Value="White" />
-                <Setter Property="BorderThickness" Value="0" />
-                <Setter Property="FontWeight" Value="SemiBold" />
+            <!-- Dark Card Style (Solid panels) -->
+            <Style x:Key="DarkCardStyle" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource NightSurfaceBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource GlassBorderBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="16"/>
+                <Setter Property="Padding" Value="24"/>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect BlurRadius="30" ShadowDepth="0" Opacity="0.4" Color="#000000"/>
+                    </Setter.Value>
+                </Setter>
             </Style>
 
-            <!-- Safe Button Style (Emerald) -->
+            <!-- Stat Card Style (For dashboard stats) -->
+            <Style x:Key="StatCardStyle" TargetType="Border">
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#0a0f1a" Offset="0"/>
+                            <GradientStop Color="#111827" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="BorderBrush" Value="{StaticResource GlassBorderBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="12"/>
+                <Setter Property="Padding" Value="20"/>
+            </Style>
+
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <!-- BUTTON STYLES                                                    -->
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+
+            <!-- Cyber Button (Primary action) -->
+            <Style x:Key="CyberButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="{StaticResource CyanPrimary}" Offset="0"/>
+                            <GradientStop Color="{StaticResource CyanMuted}" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.5" Color="{StaticResource CyanPrimary}"/>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Accent Button Style (Legacy compatibility) -->
+            <Style x:Key="AccentButtonStyle" TargetType="Button" BasedOn="{StaticResource CyberButtonStyle}"/>
+
+            <!-- Safe Button (Green glow) -->
             <Style x:Key="SafeButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
-                <Setter Property="Background" Value="{StaticResource EmeraldSafeBrush}" />
-                <Setter Property="Foreground" Value="White" />
-                <Setter Property="BorderThickness" Value="0" />
-                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="{StaticResource StatusSafe}" Offset="0"/>
+                            <GradientStop Color="#059669" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect BlurRadius="15" ShadowDepth="0" Opacity="0.4" Color="{StaticResource StatusSafe}"/>
+                    </Setter.Value>
+                </Setter>
             </Style>
 
-            <!-- Danger Button Style (Rose) -->
+            <!-- Danger Button (Red glow) -->
             <Style x:Key="DangerButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
-                <Setter Property="Background" Value="{StaticResource RoseDangerBrush}" />
-                <Setter Property="Foreground" Value="White" />
-                <Setter Property="BorderThickness" Value="0" />
-                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="{StaticResource StatusDanger}" Offset="0"/>
+                            <GradientStop Color="#dc2626" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect BlurRadius="15" ShadowDepth="0" Opacity="0.4" Color="{StaticResource StatusDanger}"/>
+                    </Setter.Value>
+                </Setter>
             </Style>
+
+            <!-- Ghost Button (Outline style) -->
+            <Style x:Key="GhostButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{StaticResource CyanPrimaryBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource CyanPrimaryBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+            </Style>
+
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <!-- LEGACY COMPATIBILITY BRUSHES                                     -->
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+
+            <SolidColorBrush x:Key="SlateBackgroundBrush" Color="{StaticResource VoidBlack}" />
+            <SolidColorBrush x:Key="SlateCardBrush" Color="{StaticResource NightSurface}" />
+            <SolidColorBrush x:Key="SlateCardHoverBrush" Color="{StaticResource DarkPanel}" />
+            <SolidColorBrush x:Key="SlateBorderBrush" Color="{StaticResource GlassBorder}" />
+            <SolidColorBrush x:Key="IndigoAccentBrush" Color="{StaticResource CyanPrimary}" />
+            <SolidColorBrush x:Key="IndigoAccentHoverBrush" Color="{StaticResource CyanGlow}" />
+            <SolidColorBrush x:Key="EmeraldSafeBrush" Color="{StaticResource StatusSafe}" />
+            <SolidColorBrush x:Key="AmberWarningBrush" Color="{StaticResource StatusWarning}" />
+            <SolidColorBrush x:Key="RoseDangerBrush" Color="{StaticResource StatusDanger}" />
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -7,14 +7,26 @@ using System.Runtime.InteropServices;
 using Microsoft.Win32;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace CyberShieldBuddy
 {
+    // ═══════════════════════════════════════════════════════════════
+    // ENUMS & DATA MODELS
+    // ═══════════════════════════════════════════════════════════════
+
     public enum SecurityStatus
     {
         Safe,
         Warning,
         Unsafe
+    }
+
+    public enum ThreatLevel
+    {
+        Safe,
+        Caution,
+        Danger
     }
 
     public class SecurityCheckResult
@@ -26,15 +38,27 @@ namespace CyberShieldBuddy
         public string UnsafeMessage { get; set; } = "";
         public string Tip { get; set; } = "";
         public SecurityStatus Status { get; set; }
-        public string Icon { get; set; } = "\uE83D"; // Shield icon default
+        public string Icon { get; set; } = "\uE83D";
+        public int Weight { get; set; } = 1; // For weighted scoring
 
         public string StatusText => Status == SecurityStatus.Safe ? "Protected" :
                                     Status == SecurityStatus.Warning ? "Review needed" : "Action needed";
-        public string StatusIcon => Status == SecurityStatus.Safe ? "\uE73E" : // Checkmark
-                                    Status == SecurityStatus.Warning ? "\uE7BA" : // Warning
-                                    "\uE711"; // X mark
+        public string StatusIcon => Status == SecurityStatus.Safe ? "\uE73E" :
+                                    Status == SecurityStatus.Warning ? "\uE7BA" : "\uE711";
         public string CurrentMessage => Status == SecurityStatus.Safe ? SafeMessage : UnsafeMessage;
     }
+
+    public class UrlAnalysisResult
+    {
+        public ThreatLevel ThreatLevel { get; set; }
+        public string Message { get; set; } = "";
+        public int RiskScore { get; set; }
+        public List<string> Flags { get; set; } = new List<string>();
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // SECURITY ENGINE - Premium Edition
+    // ═══════════════════════════════════════════════════════════════
 
     public static class SecurityEngine
     {
@@ -50,12 +74,12 @@ namespace CyberShieldBuddy
         // --- P/Invoke for TCP Table ---
         [DllImport("iphlpapi.dll", SetLastError = true)]
         static extern uint GetExtendedTcpTable(IntPtr pTcpTable, ref int dwOutBufLen, bool sort, int ipVersion, int tcpTableType, int reserved);
-        
+
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool GetFirmwareEnvironmentVariable(string lpName, string lpGuid, IntPtr pBuffer, uint nSize);
 
-        public const int AF_INET = 2;    // IPv4
+        public const int AF_INET = 2;
         public const int TCP_TABLE_OWNER_PID_ALL = 5;
 
         [StructLayout(LayoutKind.Sequential)]
@@ -90,7 +114,57 @@ namespace CyberShieldBuddy
             public string ProcessName { get; set; } = "";
         }
 
-        // --- Hardening Checks ---
+        // ═══════════════════════════════════════════════════════════════
+        // WEIGHTED SCORING SYSTEM
+        // ═══════════════════════════════════════════════════════════════
+
+        // Security check weights (higher = more important)
+        private static readonly Dictionary<string, int> CheckWeights = new Dictionary<string, int>
+        {
+            { "rdp", 20 },           // Remote Desktop - Critical
+            { "smb", 20 },           // SMBv1 - Critical (WannaCry vector)
+            { "guest", 15 },         // Guest Account - High
+            { "lsa", 15 },           // LSA Protection - High
+            { "autologon", 15 },     // Auto Logon - High
+            { "credential", 15 }     // Credential Guard - High
+        };
+
+        public static int CalculateHardeningScore()
+        {
+            int totalWeight = 0;
+            int earnedWeight = 0;
+
+            // RDP Check (Critical - 20 points)
+            totalWeight += CheckWeights["rdp"];
+            if (CheckRDPStatus()) earnedWeight += CheckWeights["rdp"];
+
+            // SMBv1 Check (Critical - 20 points)
+            totalWeight += CheckWeights["smb"];
+            if (CheckSMBv1()) earnedWeight += CheckWeights["smb"];
+
+            // Guest Account (High - 15 points)
+            totalWeight += CheckWeights["guest"];
+            if (CheckGuestAccount()) earnedWeight += CheckWeights["guest"];
+
+            // LSA Protection (High - 15 points)
+            totalWeight += CheckWeights["lsa"];
+            if (CheckLSAProtection()) earnedWeight += CheckWeights["lsa"];
+
+            // Auto Logon (High - 15 points)
+            totalWeight += CheckWeights["autologon"];
+            if (CheckAutoLogon()) earnedWeight += CheckWeights["autologon"];
+
+            // Credential Guard (High - 15 points)
+            totalWeight += CheckWeights["credential"];
+            if (CheckCredentialGuard()) earnedWeight += CheckWeights["credential"];
+
+            // Calculate percentage score
+            return (int)Math.Round((double)earnedWeight / totalWeight * 100);
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // HARDENING CHECKS
+        // ═══════════════════════════════════════════════════════════════
 
         public static bool CheckRDPStatus()
         {
@@ -101,7 +175,7 @@ namespace CyberShieldBuddy
                     if (key != null)
                     {
                         var val = key.GetValue("fDenyTSConnections");
-                        return val != null && (int)val == 1; // 1 means RDP is disabled (secure)
+                        return val != null && (int)val == 1;
                     }
                 }
             }
@@ -118,23 +192,21 @@ namespace CyberShieldBuddy
                     if (key != null)
                     {
                         var val = key.GetValue("SMB1");
-                        return val != null && (int)val == 0; // 0 means SMB1 disabled
+                        return val != null && (int)val == 0;
                     }
                 }
             }
             catch (Exception ex) { AuditLogger.Log($"Error checking SMBv1: {ex.Message}", "ERROR"); }
-            return false; // Assume unsafe if check fails
+            return false;
         }
 
         public static bool CheckGuestAccount()
         {
-            // Replaced PowerShell with DirectoryServices for ~50MB memory savings and faster execution
             try
             {
                 using (var context = new PrincipalContext(ContextType.Machine))
                 {
                     var guest = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, "Guest");
-                    // If guest is null, it doesn't exist (Secure). If Enabled is null/false, it is Secure.
                     return guest == null || (guest.Enabled != true);
                 }
             }
@@ -171,19 +243,18 @@ namespace CyberShieldBuddy
                     if (key != null)
                     {
                         var val = key.GetValue("AutoAdminLogon");
-                        // If it's "1", AutoLogon is ON (Unsafe). We want it to be 0 or null.
                         if (val != null && val.ToString() == "1") return false;
                         return true;
                     }
                 }
             }
             catch (Exception ex) { AuditLogger.Log($"Error checking AutoLogon: {ex.Message}", "ERROR"); }
-            return true; // Default to safe if key missing
+            return true;
         }
 
         public static string CheckPowerShellExecutionPolicy()
         {
-             try
+            try
             {
                 using (var ps = PowerShell.Create())
                 {
@@ -202,7 +273,7 @@ namespace CyberShieldBuddy
 
         public static bool CheckCredentialGuard()
         {
-             try
+            try
             {
                 using (var key = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\CredentialGuard"))
                 {
@@ -212,13 +283,11 @@ namespace CyberShieldBuddy
                         return val != null && (int)val == 1;
                     }
                 }
-                // Also check LSA Iso
                 using (var key = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Control\LSA"))
                 {
-                     if (key != null)
+                    if (key != null)
                     {
                         var val = key.GetValue("LsaCfgFlags");
-                        // 1 or 2 enables LSA ISO
                         return val != null && ((int)val == 1 || (int)val == 2);
                     }
                 }
@@ -227,7 +296,9 @@ namespace CyberShieldBuddy
             return false;
         }
 
-        // --- System Info Gathering ---
+        // ═══════════════════════════════════════════════════════════════
+        // SYSTEM INFO
+        // ═══════════════════════════════════════════════════════════════
 
         public struct SystemInfo
         {
@@ -249,7 +320,6 @@ namespace CyberShieldBuddy
 
             try
             {
-                 // OS Build
                 var osKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
                 if (osKey != null)
                 {
@@ -258,23 +328,20 @@ namespace CyberShieldBuddy
 
                 using (var ps = PowerShell.Create())
                 {
-                     // BIOS Serial
                     ps.AddScript("Get-CimInstance Win32_Bios | Select-Object -ExpandProperty SerialNumber");
                     var biosRes = ps.Invoke();
                     if (biosRes.Count > 0) info.BiosSerial = biosRes[0].ToString();
                     ps.Commands.Clear();
 
-                    // TPM Status
                     ps.AddScript("Get-Tpm | Select-Object -ExpandProperty TpmPresent");
                     var tpmRes = ps.Invoke();
                     if (tpmRes.Count > 0 && (bool)tpmRes[0].BaseObject) info.TpmStatus = "Present & Ready";
                     else info.TpmStatus = "Not Detected";
                     ps.Commands.Clear();
 
-                    // BitLocker
                     ps.AddScript("Get-BitLockerVolume -MountPoint 'C:' | Select-Object -ExpandProperty ProtectionStatus");
                     var bitRes = ps.Invoke();
-                    if (bitRes.Count > 0) info.BitLockerStatus = bitRes[0].ToString(); // Off or On
+                    if (bitRes.Count > 0) info.BitLockerStatus = bitRes[0].ToString();
                 }
             }
             catch (Exception ex)
@@ -283,96 +350,81 @@ namespace CyberShieldBuddy
             }
             return info;
         }
-        
-        public static int CalculateHardeningScore()
-        {
-            int score = 0;
-            int totalChecks = 6; 
-
-            if (CheckRDPStatus()) score++;
-            if (CheckSMBv1()) score++;
-            if (CheckGuestAccount()) score++;
-            if (CheckLSAProtection()) score++;
-            if (CheckAutoLogon()) score++;
-            if (CheckCredentialGuard()) score++;
-
-            return (int)((double)score / totalChecks * 100);
-        }
 
         public static List<SecurityCheckResult> GetAllSecurityChecks()
         {
             var results = new List<SecurityCheckResult>();
 
-            // RDP Check
             results.Add(new SecurityCheckResult
             {
                 Key = "rdp",
                 Title = "Remote Desktop",
-                Icon = "\uE7F4", // Monitor icon
+                Icon = "\uE7F4",
                 SafeMessage = "Remote access is blocked - hackers can't connect to your PC remotely.",
                 UnsafeMessage = "Remote access is enabled - someone could potentially access your PC from the internet.",
                 Tip = "Unless you specifically need to connect from another computer, keep this disabled.",
-                Status = CheckRDPStatus() ? SecurityStatus.Safe : SecurityStatus.Unsafe
+                Status = CheckRDPStatus() ? SecurityStatus.Safe : SecurityStatus.Unsafe,
+                Weight = CheckWeights["rdp"]
             });
 
-            // SMBv1 Check
             results.Add(new SecurityCheckResult
             {
                 Key = "smb",
-                Title = "Old File Sharing (SMBv1)",
-                Icon = "\uE8B7", // Link icon
+                Title = "Legacy File Sharing (SMBv1)",
+                Icon = "\uE8B7",
                 SafeMessage = "Outdated file sharing (SMBv1) is disabled - protected against ransomware attacks.",
                 UnsafeMessage = "Outdated file sharing is enabled - vulnerable to WannaCry-style attacks.",
                 Tip = "SMBv1 is from 1983. Modern file sharing works without it.",
-                Status = CheckSMBv1() ? SecurityStatus.Safe : SecurityStatus.Unsafe
+                Status = CheckSMBv1() ? SecurityStatus.Safe : SecurityStatus.Unsafe,
+                Weight = CheckWeights["smb"]
             });
 
-            // Guest Account Check
             results.Add(new SecurityCheckResult
             {
                 Key = "guest",
                 Title = "Guest Account",
-                Icon = "\uE77B", // Contact icon
+                Icon = "\uE77B",
                 SafeMessage = "Guest account is disabled - no anonymous access to your PC.",
                 UnsafeMessage = "Guest account is active - anyone could use your PC without a password.",
                 Tip = "The Guest account lets people use your PC without logging in.",
-                Status = CheckGuestAccount() ? SecurityStatus.Safe : SecurityStatus.Unsafe
+                Status = CheckGuestAccount() ? SecurityStatus.Safe : SecurityStatus.Unsafe,
+                Weight = CheckWeights["guest"]
             });
 
-            // LSA Protection Check
             results.Add(new SecurityCheckResult
             {
                 Key = "lsa",
-                Title = "Password Protection",
-                Icon = "\uE83D", // Shield icon
+                Title = "Password Protection (LSA)",
+                Icon = "\uE83D",
                 SafeMessage = "Your passwords are protected with extra security.",
                 UnsafeMessage = "Your saved passwords could be more vulnerable to theft.",
                 Tip = "LSA Protection keeps your Windows passwords safe from hackers.",
-                Status = CheckLSAProtection() ? SecurityStatus.Safe : SecurityStatus.Warning
+                Status = CheckLSAProtection() ? SecurityStatus.Safe : SecurityStatus.Warning,
+                Weight = CheckWeights["lsa"]
             });
 
-            // Auto Logon Check
             results.Add(new SecurityCheckResult
             {
                 Key = "autologon",
                 Title = "Auto Login",
-                Icon = "\uE72E", // Unlock icon
+                Icon = "\uE72E",
                 SafeMessage = "You must enter your password to log in - good!",
                 UnsafeMessage = "Your PC logs in automatically - anyone who turns it on gets full access.",
                 Tip = "Auto-login is convenient but risky if your computer is ever stolen.",
-                Status = CheckAutoLogon() ? SecurityStatus.Safe : SecurityStatus.Unsafe
+                Status = CheckAutoLogon() ? SecurityStatus.Safe : SecurityStatus.Unsafe,
+                Weight = CheckWeights["autologon"]
             });
 
-            // Credential Guard Check
             results.Add(new SecurityCheckResult
             {
                 Key = "credential",
                 Title = "Credential Guard",
-                Icon = "\uE8D7", // Certificate icon
+                Icon = "\uE8D7",
                 SafeMessage = "Advanced password protection is active.",
                 UnsafeMessage = "Advanced protection is available but not enabled.",
                 Tip = "This is enterprise-grade security. Nice to have but not required for home use.",
-                Status = CheckCredentialGuard() ? SecurityStatus.Safe : SecurityStatus.Warning
+                Status = CheckCredentialGuard() ? SecurityStatus.Safe : SecurityStatus.Warning,
+                Weight = CheckWeights["credential"]
             });
 
             return results;
@@ -383,32 +435,30 @@ namespace CyberShieldBuddy
             var issues = new List<string>();
             try
             {
-                // check 1: Screen Saver Password Enable
                 using (var key = Registry.CurrentUser.OpenSubKey(@"Control Panel\Desktop"))
                 {
                     if (key != null)
                     {
                         var val = key.GetValue("ScreenSaverIsSecure");
-                         if (val == null || val.ToString() != "1") issues.Add("Screen Saver Password Protection is DISABLED.");
-                         
-                         var timeout = key.GetValue("ScreenSaveTimeOut"); // Seconds
-                         if (timeout != null && int.TryParse(timeout.ToString(), out int seconds))
-                         {
-                             if (seconds > 900) issues.Add($"Screen Lock Timeout is too long ({seconds/60} mins). Max allowed: 15 mins.");
-                         }
-                         else issues.Add("Screen Lock Timeout not set.");
+                        if (val == null || val.ToString() != "1") issues.Add("Screen Saver Password Protection is DISABLED.");
+
+                        var timeout = key.GetValue("ScreenSaveTimeOut");
+                        if (timeout != null && int.TryParse(timeout.ToString(), out int seconds))
+                        {
+                            if (seconds > 900) issues.Add($"Screen Lock Timeout is too long ({seconds / 60} mins). Max allowed: 15 mins.");
+                        }
+                        else issues.Add("Screen Lock Timeout not set.");
                     }
                 }
 
-                // check 2: Removable Storage Write Protect (Machine)
                 using (var key = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Control\StorageDevicePolicies"))
                 {
                     if (key != null)
                     {
-                         var val = key.GetValue("WriteProtect");
-                         if (val == null || (int)val != 1) issues.Add("USB Write Protection is DISABLED.");
+                        var val = key.GetValue("WriteProtect");
+                        if (val == null || (int)val != 1) issues.Add("USB Write Protection is DISABLED.");
                     }
-                     else issues.Add("USB Write Protection is DISABLED (Key missing).");
+                    else issues.Add("USB Write Protection is DISABLED (Key missing).");
                 }
             }
             catch (Exception ex)
@@ -419,13 +469,14 @@ namespace CyberShieldBuddy
             return issues;
         }
 
-        // --- Hardening Actions ---
+        // ═══════════════════════════════════════════════════════════════
+        // HARDENING ACTIONS
+        // ═══════════════════════════════════════════════════════════════
 
         public static void ApplyHardeningBaseline()
         {
             AuditLogger.Log("Starting Hardening Baseline Application...", "INFO");
 
-            // Disable RDP
             try
             {
                 Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server", "fDenyTSConnections", 1, RegistryValueKind.DWord);
@@ -433,7 +484,6 @@ namespace CyberShieldBuddy
             }
             catch (Exception ex) { AuditLogger.Log($"Failed to disable RDP: {ex.Message}", "ERROR"); }
 
-            // Disable SMBv1
             try
             {
                 Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters", "SMB1", 0, RegistryValueKind.DWord);
@@ -441,7 +491,6 @@ namespace CyberShieldBuddy
             }
             catch (Exception ex) { AuditLogger.Log($"Failed to disable SMBv1: {ex.Message}", "ERROR"); }
 
-            // Enable LSA Protection
             try
             {
                 Registry.SetValue(@"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa", "RunAsPPL", 1, RegistryValueKind.DWord);
@@ -449,7 +498,6 @@ namespace CyberShieldBuddy
             }
             catch (Exception ex) { AuditLogger.Log($"Failed to enable LSA: {ex.Message}", "ERROR"); }
 
-            // Disable Guest Account
             try
             {
                 using (var ps = PowerShell.Create())
@@ -465,7 +513,9 @@ namespace CyberShieldBuddy
             AuditLogger.Log("Hardening Baseline Application Complete.", "INFO");
         }
 
-        // --- Network Sentry ---
+        // ═══════════════════════════════════════════════════════════════
+        // NETWORK SENTRY
+        // ═══════════════════════════════════════════════════════════════
 
         public static List<NetworkConnection> GetNetworkConnections()
         {
@@ -484,7 +534,7 @@ namespace CyberShieldBuddy
                     for (int i = 0; i < table.dwNumEntries; i++)
                     {
                         MIB_TCPROW_OWNER_PID row = Marshal.PtrToStructure<MIB_TCPROW_OWNER_PID>(rowPtr);
-                        
+
                         connections.Add(new NetworkConnection
                         {
                             LocalAddress = IPToString(row.localAddr),
@@ -550,13 +600,14 @@ namespace CyberShieldBuddy
             DeleteTcb = 12
         }
 
-        // --- Resolution Emergency ---
+        // ═══════════════════════════════════════════════════════════════
+        // DISPLAY FIX
+        // ═══════════════════════════════════════════════════════════════
 
         public static void FixDisplayResolution()
         {
             AuditLogger.Log("Attempting to fix display resolution...", "INFO");
 
-            // SAFETY: Backup registry keys before destructive operations
             string backupDir = Path.Combine(Path.GetTempPath(), "CyberShieldBuddy_Backups");
             Directory.CreateDirectory(backupDir);
             string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
@@ -564,7 +615,6 @@ namespace CyberShieldBuddy
 
             try
             {
-                // Export registry keys using reg.exe for reliable backup
                 var exportProcess = new Process
                 {
                     StartInfo = new ProcessStartInfo
@@ -593,7 +643,6 @@ namespace CyberShieldBuddy
                 AuditLogger.Log($"Backup failed: {ex.Message}. Proceeding with caution.", "WARN");
             }
 
-            // Proceed with registry deletion
             try
             {
                 using (var key = Registry.LocalMachine.OpenSubKey(REG_GRAPHICS_CONFIG, true))
@@ -630,32 +679,272 @@ namespace CyberShieldBuddy
             }
         }
 
+        // ═══════════════════════════════════════════════════════════════
+        // ADVANCED URL ANALYSIS
+        // ═══════════════════════════════════════════════════════════════
 
+        // Suspicious TLDs commonly used in phishing
+        private static readonly HashSet<string> SuspiciousTlds = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ".tk", ".ml", ".ga", ".cf", ".gq",     // Free TLDs often abused
+            ".xyz", ".top", ".club", ".work",      // Cheap TLDs popular with scammers
+            ".click", ".link", ".download",        // Action TLDs
+            ".review", ".stream", ".racing",       // Suspicious generic TLDs
+            ".bid", ".win", ".loan", ".date",      // Financial/dating scam TLDs
+            ".party", ".trade", ".webcam",         // Commonly abused TLDs
+            ".zip", ".mov"                         // New confusing TLDs
+        };
 
-        // --- Basic URL Syntax Checker ---
-        // NOTE: This is NOT a phishing detector. It only checks URL format.
-        // For actual phishing detection, integrate Google Safe Browsing or VirusTotal API.
+        // Major brands commonly impersonated
+        private static readonly string[] ImpersonatedBrands = new[]
+        {
+            "paypal", "apple", "microsoft", "google", "amazon", "facebook",
+            "netflix", "instagram", "twitter", "linkedin", "dropbox", "chase",
+            "wellsfargo", "bankofamerica", "citibank", "usbank", "capitalone",
+            "americanexpress", "visa", "mastercard", "venmo", "cashapp",
+            "coinbase", "binance", "metamask", "opensea", "steam", "epic",
+            "roblox", "discord", "telegram", "whatsapp", "outlook", "yahoo",
+            "adobe", "spotify", "uber", "airbnb", "ebay", "walmart", "target"
+        };
+
+        // Legitimate domain suffixes for brands
+        private static readonly Dictionary<string, string[]> LegitDomains = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "paypal", new[] { "paypal.com", "paypal.me" } },
+            { "apple", new[] { "apple.com", "icloud.com" } },
+            { "microsoft", new[] { "microsoft.com", "live.com", "outlook.com", "office.com", "azure.com" } },
+            { "google", new[] { "google.com", "gmail.com", "youtube.com", "googleapis.com" } },
+            { "amazon", new[] { "amazon.com", "amazon.co.uk", "aws.amazon.com", "amazonws.com" } },
+            { "facebook", new[] { "facebook.com", "fb.com", "meta.com" } },
+            { "netflix", new[] { "netflix.com" } },
+        };
+
+        /// <summary>
+        /// Advanced URL analysis with weighted risk scoring
+        /// </summary>
+        public static UrlAnalysisResult AnalyzeUrlAdvanced(string url)
+        {
+            var result = new UrlAnalysisResult
+            {
+                ThreatLevel = ThreatLevel.Safe,
+                RiskScore = 0,
+                Flags = new List<string>()
+            };
+
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                result.Message = "Please enter a URL to analyze.";
+                return result;
+            }
+
+            // Normalize URL
+            string normalizedUrl = url.Trim().ToLowerInvariant();
+            if (!normalizedUrl.StartsWith("http"))
+            {
+                normalizedUrl = "https://" + normalizedUrl;
+            }
+
+            Uri uri;
+            try
+            {
+                uri = new Uri(normalizedUrl);
+            }
+            catch
+            {
+                result.ThreatLevel = ThreatLevel.Danger;
+                result.RiskScore = 100;
+                result.Message = "Invalid URL format. Cannot parse.";
+                return result;
+            }
+
+            string host = uri.Host;
+            string fullUrl = uri.ToString();
+
+            // ═══════════════════════════════════════════════════════════════
+            // CHECK 1: IP Address Usage (+40 risk)
+            // ═══════════════════════════════════════════════════════════════
+            if (Regex.IsMatch(host, @"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"))
+            {
+                result.RiskScore += 40;
+                result.Flags.Add("Uses raw IP address instead of domain name");
+            }
+
+            // ═══════════════════════════════════════════════════════════════
+            // CHECK 2: Suspicious TLD (+25 risk)
+            // ═══════════════════════════════════════════════════════════════
+            foreach (var tld in SuspiciousTlds)
+            {
+                if (host.EndsWith(tld, StringComparison.OrdinalIgnoreCase))
+                {
+                    result.RiskScore += 25;
+                    result.Flags.Add($"Uses suspicious TLD: {tld}");
+                    break;
+                }
+            }
+
+            // ═══════════════════════════════════════════════════════════════
+            // CHECK 3: Brand Impersonation Detection (+50 risk)
+            // ═══════════════════════════════════════════════════════════════
+            foreach (var brand in ImpersonatedBrands)
+            {
+                if (host.Contains(brand, StringComparison.OrdinalIgnoreCase))
+                {
+                    // Check if it's the legitimate domain
+                    bool isLegit = false;
+                    if (LegitDomains.TryGetValue(brand, out var legitDomains))
+                    {
+                        foreach (var legitDomain in legitDomains)
+                        {
+                            if (host.Equals(legitDomain, StringComparison.OrdinalIgnoreCase) ||
+                                host.EndsWith("." + legitDomain, StringComparison.OrdinalIgnoreCase))
+                            {
+                                isLegit = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!isLegit)
+                    {
+                        // Check for common typosquatting patterns
+                        if (Regex.IsMatch(host, $@"{brand}[-_.]?(login|secure|verify|account|update|support|help)", RegexOptions.IgnoreCase) ||
+                            Regex.IsMatch(host, $@"(login|secure|verify|account|update)[-_.]?{brand}", RegexOptions.IgnoreCase))
+                        {
+                            result.RiskScore += 50;
+                            result.Flags.Add($"Possible {brand.ToUpper()} impersonation attempt");
+                        }
+                        else if (!host.EndsWith($".{brand}.com", StringComparison.OrdinalIgnoreCase))
+                        {
+                            result.RiskScore += 35;
+                            result.Flags.Add($"Contains brand name '{brand}' but may not be official");
+                        }
+                    }
+                    break;
+                }
+            }
+
+            // ═══════════════════════════════════════════════════════════════
+            // CHECK 4: URL Encoding / Obfuscation (+30 risk)
+            // ═══════════════════════════════════════════════════════════════
+            int encodedCharCount = Regex.Matches(fullUrl, @"%[0-9A-Fa-f]{2}").Count;
+            if (encodedCharCount > 5)
+            {
+                result.RiskScore += 30;
+                result.Flags.Add($"Heavy URL encoding ({encodedCharCount} encoded characters)");
+            }
+            else if (encodedCharCount > 2)
+            {
+                result.RiskScore += 15;
+                result.Flags.Add("Contains URL-encoded characters");
+            }
+
+            // ═══════════════════════════════════════════════════════════════
+            // CHECK 5: @ Symbol in URL (+35 risk)
+            // ═══════════════════════════════════════════════════════════════
+            if (fullUrl.Contains("@") && fullUrl.IndexOf("@") < fullUrl.IndexOf("/", 8))
+            {
+                result.RiskScore += 35;
+                result.Flags.Add("Contains @ symbol (can hide real destination)");
+            }
+
+            // ═══════════════════════════════════════════════════════════════
+            // CHECK 6: Excessive Subdomains (+20 risk)
+            // ═══════════════════════════════════════════════════════════════
+            int subdomainCount = host.Split('.').Length - 2;
+            if (subdomainCount > 3)
+            {
+                result.RiskScore += 20;
+                result.Flags.Add($"Excessive subdomains ({subdomainCount} levels deep)");
+            }
+
+            // ═══════════════════════════════════════════════════════════════
+            // CHECK 7: Suspicious Keywords in Path (+15 risk each)
+            // ═══════════════════════════════════════════════════════════════
+            string[] suspiciousKeywords = { "login", "signin", "verify", "secure", "update", "confirm", "account", "password", "credential", "banking", "wallet" };
+            foreach (var keyword in suspiciousKeywords)
+            {
+                if (uri.PathAndQuery.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                {
+                    result.RiskScore += 15;
+                    result.Flags.Add($"Suspicious keyword in path: '{keyword}'");
+                    break; // Only count once
+                }
+            }
+
+            // ═══════════════════════════════════════════════════════════════
+            // CHECK 8: Extremely Long URL (+10 risk)
+            // ═══════════════════════════════════════════════════════════════
+            if (fullUrl.Length > 100)
+            {
+                result.RiskScore += 10;
+                result.Flags.Add("Unusually long URL");
+            }
+
+            // ═══════════════════════════════════════════════════════════════
+            // CHECK 9: Non-standard Port (+15 risk)
+            // ═══════════════════════════════════════════════════════════════
+            if (uri.Port != 80 && uri.Port != 443 && uri.Port != -1)
+            {
+                result.RiskScore += 15;
+                result.Flags.Add($"Non-standard port: {uri.Port}");
+            }
+
+            // ═══════════════════════════════════════════════════════════════
+            // CHECK 10: HTTP instead of HTTPS (+20 risk)
+            // ═══════════════════════════════════════════════════════════════
+            if (uri.Scheme == "http")
+            {
+                result.RiskScore += 20;
+                result.Flags.Add("Uses insecure HTTP (not HTTPS)");
+            }
+
+            // ═══════════════════════════════════════════════════════════════
+            // DETERMINE THREAT LEVEL
+            // ═══════════════════════════════════════════════════════════════
+            if (result.RiskScore >= 50)
+            {
+                result.ThreatLevel = ThreatLevel.Danger;
+            }
+            else if (result.RiskScore >= 25)
+            {
+                result.ThreatLevel = ThreatLevel.Caution;
+            }
+            else
+            {
+                result.ThreatLevel = ThreatLevel.Safe;
+            }
+
+            // ═══════════════════════════════════════════════════════════════
+            // BUILD RESULT MESSAGE
+            // ═══════════════════════════════════════════════════════════════
+            if (result.Flags.Count == 0)
+            {
+                result.Message = "No red flags detected. URL appears legitimate.\n\nAlways verify you're on the correct website before entering credentials.";
+            }
+            else
+            {
+                string severity = result.ThreatLevel == ThreatLevel.Danger ? "HIGH RISK" :
+                                  result.ThreatLevel == ThreatLevel.Caution ? "CAUTION" : "LOW RISK";
+
+                result.Message = $"{severity} (Score: {result.RiskScore}/100)\n\n";
+                result.Message += string.Join("\n", result.Flags.Select(f => $"• {f}"));
+
+                if (result.ThreatLevel == ThreatLevel.Danger)
+                {
+                    result.Message += "\n\nDo NOT enter any personal information on this site.";
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Legacy URL analysis method (for backwards compatibility)
+        /// </summary>
         public static string AnalyzeUrl(string url)
         {
-            if (string.IsNullOrWhiteSpace(url)) return "Please enter a URL.";
-
-            // Basic format checks
-            if (!url.StartsWith("http", StringComparison.OrdinalIgnoreCase))
-                return "⚠️ Format Issue: URL does not start with http/https.";
-
-            // Check for IP address usage
-            if (System.Text.RegularExpressions.Regex.IsMatch(url, @"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"))
-                return "⚠️ Caution: URL contains raw IP address (common in phishing).";
-
-            // Suspicious characters
-            if (url.Contains("@"))
-                return "⚠️ Caution: URL contains '@' symbol (common in credential harvesting).";
-
-            // Length check
-            if (url.Length > 75)
-                return "ℹ️ Note: Unusually long URL. Verify the domain carefully.";
-
-            return "✓ No obvious format issues detected.\n⚠️ This does NOT guarantee the site is safe. Always verify the domain name.";
+            var result = AnalyzeUrlAdvanced(url);
+            return result.Message;
         }
     }
 }
